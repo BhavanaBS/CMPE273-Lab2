@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import '../../App.css';
-import cookie from 'react-cookies';
 import { Redirect } from 'react-router';
 import { connect } from "react-redux";
-import { loginToCustomer } from "../../redux/action/customerActions";
+import '../../App.css';
+import { customerLogin } from "../../redux/action/loginActions";
+const jwt_decode = require('jwt-decode');
 
 //Define a Login Component
 class CustomerLoginForm extends Component {
@@ -12,36 +12,19 @@ class CustomerLoginForm extends Component {
         //Call the constrictor of Super class i.e The Component
         super(props);
         //maintain the state required for this component
-        this.state = {
-            email_id: "",
-            password: "",
-            authFlag: false
-        }
-        //Bind the handlers to this class
-        this.emailChangeHandler = this.emailChangeHandler.bind(this);
-        this.passwordChangeHandler = this.passwordChangeHandler.bind(this);
-        this.customerLoginSubmitAction = this.customerLoginSubmitAction.bind(this);
+        this.state = {}
     }
-    //Call the Will Mount to set the auth Flag to false
-    componentWillMount() {
+
+    onChange = (e) => {
         this.setState({
-            authFlag: false
+            [e.target.name]: e.target.value
         })
     }
-    //username change handler to update state variable with the text entered by the user
-    emailChangeHandler = (e) => {
-        this.setState({
-            email_id: e.target.value
-        })
-    }
-    //password change handler to update state variable with the text entered by the user
-    passwordChangeHandler = (e) => {
-        this.setState({
-            password: e.target.value
-        })
-    }
+
     //submit Login handler to send a request to the node backend
-    customerLoginSubmitAction = (e) => {
+    customerLoginSubmit = (e) => {
+        console.log("customerLogin -> customerLoginSubmit -> Customer Login Entry point ");
+
         //prevent page from refresh
         e.preventDefault();
         const data = {
@@ -50,24 +33,33 @@ class CustomerLoginForm extends Component {
         }
         // Updating customer login props -> react component
         this.props.setCustomerLogin(data);
+        this.setState({
+            loginRequested: 1
+        });
     }
 
     render() {
-        // Redirect based on successful login.
-        // 1. We set the cookie when we login.
-        // 2. We set the redux state's restaurant.restaurant_id and map it to props.restaurant_id
-        console.log("customerLogin.js -> Cookie : ", cookie.load('cookie'))
-        if (cookie.load('cookie') && this.props.customer_id) {
-            console.log("---------- LOADED COOKIE ------------")
-            localStorage.setItem("customer_id", this.props.customer_id);
-            return <Redirect to="/customer/home" />
-        }
-
         let error = null;
-        if (this.props.showFailure) {
+
+        console.log('loginRequestedFlag value : ', this.state.loginRequested);
+        // Redirect based on successful login.
+        if (this.props.customer && this.props.customer.token) {
+            console.log("---------- CUSTOMER LOGGED IN ------------")
+            var decoded = jwt_decode(this.props.customer.token.split(' ')[1]);
+            console.log("Setting customer_id in Local Storage : ", decoded._id)
+            localStorage.setItem("token", this.props.customer.token);
+            localStorage.setItem("customer_id", decoded._id);
+            return <Redirect to="/customer/home" />
+        } else if(this.props.customer === "CUST_INVALID" && this.state.loginRequested){
             error = (
                 <div>
-                    <p style={{ color: "red" }}>Invalid Login Credentials!</p>
+                    <p style={{ color: "red" }}> Please Signup to proceed. </p>
+                </div>
+            );
+        } else if(this.props.customer === "CUST_INVALID_CRED" && this.state.loginRequested){
+            error = (
+                <div>
+                    <p style={{ color: "red" }}> Incorrect Password </p>
                 </div>
             );
         }
@@ -76,17 +68,17 @@ class CustomerLoginForm extends Component {
             <div>
                 <div class="container">
 
-                    <form class="login-form" onSubmit={this.customerLoginSubmitAction}>
+                    <form class="login-form" onSubmit={this.customerLoginSubmit}>
                         <div class="main-div">
                             <div class="panel">
                                 <h2>Sign in to Yelp</h2>
                             </div>
 
                             <div class="form-group">
-                                <input onChange={this.emailChangeHandler} type="text" class="form-control" name="email_id" placeholder="Email" pattern="^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$'%&*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])$" title="Please enter valid email address" required />
+                                <input onChange={this.onChange} type="text" class="form-control" name="email_id" placeholder="Email" pattern="^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$'%&*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])$" title="Please enter valid email address" required />
                             </div>
                             <div class="form-group">
-                                <input onChange={this.passwordChangeHandler} type="password" class="form-control" name="password" placeholder="Password" required/>
+                                <input onChange={this.onChange} type="password" class="form-control" name="password" placeholder="Password" required/>
                             </div>
                             {error}
                             <button type="submit" class="btn btn-primary"> Sign in </button>
@@ -98,14 +90,13 @@ class CustomerLoginForm extends Component {
     }
 }
 
-const mapStateToProps = ({ customer: { showFailure, customer_id } }) => ({
-    showFailure: showFailure,
-    customer_id: customer_id
+const mapStateToProps = state => ({
+    customer: state.loginState.customer
 });
 
 function mapDispatchToProps(dispatch) {
     return {
-        setCustomerLogin: data => dispatch(loginToCustomer(data))
+        setCustomerLogin: data => dispatch(customerLogin(data))
     };
 }
 

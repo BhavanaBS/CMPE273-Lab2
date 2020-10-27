@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import '../../App.css';
 import { connect } from "react-redux";
 import {Redirect} from 'react-router';
-import { signupAsCustomer } from "../../redux/action/customerActions";
+import { customerSignup } from "../../redux/action/signupActions";
 import { Link } from 'react-router-dom';
 
 //Define a Signup Component
@@ -13,41 +13,36 @@ class CustomerSignupForm extends Component{
         super(props);
         //maintain the state required for this component
         this.state = {
-            name : "",
-            password : "",
-            email_id : "",
-            authFlag : false
         }
-        //Bind the handlers to this class
-        this.nameChangeHandler = this.nameChangeHandler.bind(this);
-        this.passwordChangeHandler = this.passwordChangeHandler.bind(this);
-        this.emailChangeHandler = this.emailChangeHandler.bind(this);
-        this.customerSignupSubmitAction = this.customerSignupSubmitAction.bind(this);
     }
-    //Call the Will Mount to set the auth Flag to false
-    componentWillMount(){
-        this.setState({
-            authFlag : false
-        })
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.customer) {
+            var { customer } = nextProps;
+
+            if (customer === "CUST_SIGNUP_SUCCESS" || customer === "CUST_PRESENT") {
+                this.setState({
+                    signupFlag: 1
+                });
+            }
+            
+            if (customer === "CUST_SIGNUP_ERROR") {
+                this.setState({
+                    signupFailedFlag: 1
+                });
+            }
+        }
     }
+
     //name change handler to update state variable with the text entered by the user
-    nameChangeHandler = (e) => {
+    onChange = (e) => {
         this.setState({
-            name : e.target.value
-        })
-    }
-    passwordChangeHandler = (e) => {
-        this.setState({
-            password : e.target.value
-        })
-    }
-    emailChangeHandler = (e) => {
-        this.setState({
-            email_id : e.target.value
+            [e.target.name] : e.target.value
         })
     }
 
-    customerSignupSubmitAction = (e) => {
+    customerSignupSubmit = (e) => {
+        console.log("customerSignup -> customerSignupSubmit -> Customer Signup Entry point ");
         //prevent page from refresh
         e.preventDefault();
         const data = {
@@ -55,21 +50,27 @@ class CustomerSignupForm extends Component{
             password : this.state.password,
             name : this.state.name
         }
-        
         this.props.setCustomerSignup(data);
     }
 
     render(){
-        if (this.props.signupCompleted) {
+        let error = null;
+
+        if (this.props.customer === "CUST_SIGNUP_SUCCESS" && this.state.signupFlag) {
             alert("You have registered successfully. Please login to continue.");
             return <Redirect to="c_login" />
         }
-
-        let error = null;
-        if (this.props.showFailure) {
+        else if(this.props.customer === "CUST_PRESENT" && this.state.signupFlag) {
+            console.log('Signup Success');
             error = (
                 <div>
-                    <p style={{ color: "red" }}>SignUp Unsuccessful!</p>
+                    <p style={{ color: "red" }}>Email id is already registered!</p>
+                </div>
+            );
+        } else if(this.props.customer === "CUST_SIGNUP_ERROR" && this.state.signupFailedFlag) {
+            error = (
+                <div>
+                    <p style={{ color: "red" }}>Signup Error! PLease try again in some time.</p>
                 </div>
             );
         }
@@ -78,20 +79,20 @@ class CustomerSignupForm extends Component{
             <div>
                 <div class="container">
                 
-                    <form class="login-form" onSubmit= {this.customerSignupSubmitAction}>
+                    <form class="login-form" onSubmit= {this.customerSignupSubmit}>
                         <div class="main-div">
                             <div class="panel">
                                 <h2>Sign up and be awesome</h2>
                             </div>
                             
                             <div class="form-group">
-                                <input onChange = {this.nameChangeHandler} type="text" class="form-control" name="name" placeholder="Name" pattern="^[A-Za-z0-9 ]+$" required/>
+                                <input onChange = {this.onChange} type="text" class="form-control" name="name" placeholder="Name" pattern="^[A-Za-z0-9 ]+$" required/>
                             </div>
                             <div class="form-group">
-                                <input onChange = {this.emailChangeHandler} type="text" class="form-control" name="email_id" placeholder="Email" pattern="^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$'%&*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])$" title="Please enter valid email address" required/>
+                                <input onChange = {this.onChange} type="text" class="form-control" name="email_id" placeholder="Email" pattern="^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$'%&*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])$" title="Please enter valid email address" required/>
                             </div>
                             <div class="form-group">
-                                <input onChange = {this.passwordChangeHandler} type="password" class="form-control" name="password" placeholder="Password" required/>
+                                <input onChange = {this.onChange} type="password" class="form-control" name="password" placeholder="Password" required/>
                             </div>
                             {error}
                             <button type="submit" class="btn btn-primary">Sign up</button>
@@ -106,15 +107,13 @@ class CustomerSignupForm extends Component{
     }
 }
 
-const mapStateToProps = ({ customer: { showFailure, signupCompleted, customer_id }}) => ({
-    showFailure: showFailure,
-    signupCompleted: signupCompleted,
-    customer_id: customer_id
+const mapStateToProps = state => ({
+    customer: state.signupState.customer
 });
 
 function mapDispatchToProps(dispatch) {
     return {
-        setCustomerSignup: data => dispatch(signupAsCustomer(data))
+        setCustomerSignup: data => dispatch(customerSignup(data))
     };
 }
 

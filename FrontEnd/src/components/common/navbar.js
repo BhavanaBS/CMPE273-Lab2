@@ -1,6 +1,5 @@
 import React,{Component} from 'react';
 import {Link} from 'react-router-dom';
-import cookie from 'react-cookies';
 import {Redirect} from 'react-router';
 import { connect } from 'react-redux';
 import { logout } from '../../redux/action/commonActions'
@@ -15,7 +14,6 @@ class HeaderNavbar extends Component {
     }
     //handle logout to destroy the cookie
     handleLogout = () => {
-        cookie.remove('cookie', { path: '/' })
         window.localStorage.clear();
         this.props.logout();
     }
@@ -25,12 +23,10 @@ class HeaderNavbar extends Component {
         //if Cookie is set render Logout Button
         let navOptions = null;
 
-        if(cookie.load('cookie')){
-
-            console.log("I am in Navbar. I am Able to read cookie.");
-
+        if (localStorage.getItem("token")) {
+            console.log("I am in Navbar. I have a JWT Token.");
             var id;
-            if(localStorage.getItem("customer_id")) {
+            if (localStorage.getItem("customer_id")) {
                 console.log('Local Storage Value of Customer: ',localStorage.getItem("customer_id"));
                 id  = localStorage.getItem("customer_id");
             }
@@ -85,10 +81,11 @@ class HeaderNavbar extends Component {
                     </div>
                 );
             }
-        } else{
+        } 
+        else {
             //Else display login button
             this.handleLogout();
-            console.log("I am in Navbar. I am Not Able to read cookie.");
+            console.log("I am in Navbar. I dont have any JWT Token.");
             navOptions = (
                 <div class="collapse navbar-collapse navbar-right" id="navbarNav">
             <Nav className="mr-auto">
@@ -105,16 +102,10 @@ class HeaderNavbar extends Component {
             </Nav.Link>
 
           </div>
-                // <ul class="nav navbar-nav navbar-right">
-                //         <li><Link class= "btn btn-primary" to="/c_login"><span class="glyphicon glyphicon-log-in"></span> Log In</Link></li>
-                //         <li><Link class= "btn btn-primary" to="/r_login"><span class="glyphicon glyphicon-log-in"></span> Business Log In</Link></li>
-                //         <li><Link class= "btn btn-primary" to="/c_signup">SignUp</Link></li>
-                // </ul>
-
             )
         }
         let redirectVar = null;
-        if(!cookie.load('cookie')) {
+        if(!localStorage.getItem("token")) {
             redirectVar = <Redirect to="/home"/>
         }
         return(

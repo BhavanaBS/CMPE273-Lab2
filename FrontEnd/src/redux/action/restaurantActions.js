@@ -1,48 +1,11 @@
 import axios from 'axios';
-import { RESTAURANT_LOGIN_FAILURE, 
-        RESTAURANT_LOGIN_SUCCESS, 
-        RESTAURANT_SIGNUP_FAILURE, 
-        RESTAURANT_SIGNUP_SUCCESS,
+import { 
         RESTAURANT_PROFILE_GET_SUCCESS,
         RESTAURANT_PROFILE_GET_FAILED,
         RESTAURANT_PROFILE_UPDATE_SUCCESS,
         RESTAURANT_PROFILE_UPDATE_FAILED  } from "./actions";
 import backend from '../../components/common/serverDetails';
 
-// Event messages
-// The function called at the end of the login call.
-export function setRestaurantLoginSuccess(id) {
-    console.log("Restaurant Login Success Action Creator for restaurant_id ", id)
-    return {
-      type: RESTAURANT_LOGIN_SUCCESS,
-      id,
-    };
-}
-
-// The function called at the end of the login call.
-export function setRestaurantLoginFailed() {
-    console.log("Restaurant Login Failure Action Creator")
-    return {
-      type: RESTAURANT_LOGIN_FAILURE,
-    };
-}
-
-// The function called at the end of the login call.
-export function setRestaurantSignupSuccess(id) {
-    console.log("Restaurant Signup Success Action Creator with restaurant_id ", id)
-    return {
-      type: RESTAURANT_SIGNUP_SUCCESS,
-      id,
-    };
-}
-
-// The function called at the end of the login call.
-export function setRestaurantSignupFailed() {
-    console.log("Restaurant Signup Failure Action Creator")
-    return {
-      type: RESTAURANT_SIGNUP_FAILURE,
-    };
-}
 
 export function getRestaurantSuccess(restaurant) {    
     console.log("Sending Restaurant Get Success Action")
@@ -72,53 +35,6 @@ export function updateRestaurantFailed() {
     return {
       type: RESTAURANT_PROFILE_UPDATE_FAILED
     };
-}
-
-// ACTION CREATORS
-
-// Action creator for RESTAURANT_LOGIN action
-// Data has restaurant email_id and password
-export function loginToRestaurant(data) {
-    return dispatch => {
-        axios.defaults.withCredentials = true;
-        //make a post request with the user data
-        axios.post(`${backend}/restaurants/login`, data)
-            .then(response => {
-                console.log("Status Code : ", response.status, "Response JSON : ", response.data);
-                if (response.status === 200) {
-                    dispatch(setRestaurantLoginSuccess(response.data.id));
-                } else {
-                    console.log("Login Failed!");
-                    dispatch(setRestaurantLoginFailed());
-                }
-            })
-            .catch((error) => {
-                console.log("Login Failed!", error);
-                dispatch(setRestaurantLoginFailed());
-            });
-    }
-}
-
-export function signupAsRestaurant(data) {
-    return dispatch => {
-        axios.defaults.withCredentials = true;
-        //make a post request with the user data
-        axios.post(`${backend}/restaurants`, data)
-            .then(response => {
-                console.log("Restaurant Signup Status Code : ",response.status, "Response JSON : ",response.data);
-                if (response.status === 200) {
-                    dispatch(setRestaurantSignupSuccess(response.data.id));
-                    
-                } else {
-                    console.log("Restaurant Signup Failed!");
-                    dispatch(setRestaurantSignupFailed());
-                }
-            })
-            .catch((error) => {
-                console.log("Restaurant Signup Failed!", error);
-                dispatch(setRestaurantSignupFailed());
-            });
-    }
 }
 
 export function getRestaurant(restaurantId) {

@@ -1,10 +1,10 @@
 const express = require('express');
-const { checkAuthCust } = require('../../config/passport');
+const { checkAuth } = require('../../config/passport');
 
 const router = express.Router();
 const Customer = require('../../models/cust_profile');
 
-router.get('/:customer_id', checkAuthCust, (req, res) => {
+router.get('/:customer_id', checkAuth, (req, res) => {
   console.log('Inside Profile GET method');
   Customer.findById(req.params.customer_id, (error, customer) => {
     if (error) {
@@ -30,6 +30,8 @@ router.get('/:customer_id', checkAuthCust, (req, res) => {
       };
       console.log('Customer Object mapped : ', customerProfile);
       res.status(200).json(customerProfile);
+    } else {
+      res.status(404).end('Customer not found');
     }
   });
 });

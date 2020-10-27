@@ -1,24 +1,23 @@
 const express = require('express');
 const passwordHash = require('password-hash');
 const jwt = require('jsonwebtoken');
-const { custAuth } = require('../config/passport');
-const { restAuth } = require('../config/passport');
+const { auth } = require('../config/passport');
 
 const router = express.Router();
 const Customer = require('../models/cust_profile');
 const Restaurant = require('../models/rest_profile');
 const { secret } = require('../config/configuration');
 
-custAuth();
-restAuth();
+auth();
 
 router.post('/customers', (req, res) => {
+  console.log('Requested Login : ', req.body.email_id);
   Customer.findOne({ email_id: req.body.email_id }, (error, customer) => {
     if (error) {
-      res.status(500).end('System Error Occured');
+      res.status(500).end('SYS_ERROR');
     }
     if (!customer) {
-      res.status(401).end('Invalid User');
+      res.status(401).end('CUST_INVALID');
     }
     if (customer) {
       if (passwordHash.verify(req.body.password, customer.password)) {
@@ -31,7 +30,7 @@ router.post('/customers', (req, res) => {
         });
         res.status(200).json({ success: true, token: `JWT ${token}` });
       } else {
-        res.status(401).end('Invalid User Credentials');
+        res.status(401).end('CUST_INVALID_CRED');
       }
     }
   });
@@ -40,10 +39,10 @@ router.post('/customers', (req, res) => {
 router.post('/restaurants', (req, res) => {
   Restaurant.findOne({ email_id: req.body.email_id }, (error, restaurant) => {
     if (error) {
-      res.status(500).end('System Error Occured');
+      res.status(500).end('SYS_ERROR');
     }
     if (!restaurant) {
-      res.status(401).end('Invalid Restaurant');
+      res.status(401).end('REST_INVALID');
     }
     if (restaurant) {
       if (passwordHash.verify(req.body.password, restaurant.password)) {
@@ -56,7 +55,7 @@ router.post('/restaurants', (req, res) => {
         });
         res.status(200).json({ success: true, token: `JWT ${token}` });
       } else {
-        res.status(401).end('Invalid Restaurant Credentials');
+        res.status(401).end('REST_INVALID_CRED');
       }
     }
   });

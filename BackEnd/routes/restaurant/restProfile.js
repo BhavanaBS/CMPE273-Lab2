@@ -1,10 +1,10 @@
 const express = require('express');
-const { checkAuthRest } = require('../../config/passport');
+const { checkAuth } = require('../../config/passport');
 
 const router = express.Router();
 const Restaurant = require('../../models/rest_profile');
 
-router.get('/:restaurant_id', checkAuthRest, (req, res) => {
+router.get('/:restaurant_id', checkAuth, (req, res) => {
   console.log('Inside Profile GET method');
   Restaurant.findById(req.params.restaurant_id, (error, restaurant) => {
     if (error) {
@@ -26,6 +26,8 @@ router.get('/:restaurant_id', checkAuthRest, (req, res) => {
       };
       console.log('Restaurant Object mapped : ', restaurantProfile);
       res.status(200).json(restaurantProfile);
+    } else {
+      res.status(404).end('Restaurant not found');
     }
   });
 });

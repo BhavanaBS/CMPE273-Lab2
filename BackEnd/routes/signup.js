@@ -21,14 +21,14 @@ router.post('/customers', (req, res) => {
       res.writeHead(500, {
         'Content-Type': 'application/json',
       });
-      res.end('Customer Creation Failed!', err.message);
+      res.end('CUST_SIGNUP_ERROR', err.message);
     }
     if (customer) {
       console.error('Customer already present error');
       res.writeHead(500, {
         'Content-Type': 'application/json',
       });
-      res.end('Customer Already Present!');
+      res.end('CUST_PRESENT');
     } else {
       newCustomer.save((error, response) => {
         if (error) {
@@ -36,10 +36,10 @@ router.post('/customers', (req, res) => {
           res.writeHead(500, {
             'Content-Type': 'application/json',
           });
-          res.end('Customer Creation Failed!');
+          res.end('CUST_SIGNUP_ERROR');
         } else if (response) {
           console.log('Response success : ', response);
-          res.status(200).end();
+          res.status(200).end('CUST_SIGNUP_SUCCESS');
         }
       });
     }
@@ -57,20 +57,20 @@ router.post('/restaurants', (req, res) => {
   });
 
   console.log('New Restaurant Object', newRestaurant);
-  Customer.findOne({ email_id: req.body.email_id }, (err, restaurant) => {
+  Restaurant.findOne({ email_id: req.body.email_id }, (err, restaurant) => {
     if (err) {
       console.error('Connection error : ', err);
       res.writeHead(500, {
         'Content-Type': 'application/json',
       });
-      res.end('Restaurant Creation Failed!', err.message);
+      res.end('REST_SIGNUP_ERROR', err.message);
     }
     if (restaurant) {
       console.error('Restaurant already present error');
       res.writeHead(500, {
         'Content-Type': 'application/json',
       });
-      res.end('Restaurant Already Present!');
+      res.end('REST_PRESENT');
     } else {
       newRestaurant.save((error, response) => {
         if (error) {
@@ -78,10 +78,10 @@ router.post('/restaurants', (req, res) => {
           res.writeHead(500, {
             'Content-Type': 'application/json',
           });
-          res.end('Restaurant Creation Failed!');
+          res.end('REST_SIGNUP_ERROR');
         } else if (response) {
           console.log('Response success : ', response);
-          res.status(200).end();
+          res.status(200).end('REST_SIGNUP_SUCCESS');
         }
       });
     }
