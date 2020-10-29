@@ -1,22 +1,22 @@
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
 const app = require('./app');
-const { mongoDB } = require('./config/configuration');
+// const { mongoDB } = require('./config/configuration');
 
-const options = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  reconnectTries: Number.MAX_VALUE,
-  reconnectInterval: 500,
-  poolSize: 500,
-  bufferMaxEntries: 0,
-};
-mongoose.connect(mongoDB, options, (err, res) => {
-  if (err) {
-    console.log('MongoDB Connection Failed');
-  } if (res) {
-    console.log('MongoDB Connected');
-  }
-});
+// const options = {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+//   reconnectTries: Number.MAX_VALUE,
+//   reconnectInterval: 500,
+//   poolSize: 500,
+//   bufferMaxEntries: 0,
+// };
+// mongoose.connect(mongoDB, options, (err, res) => {
+//   if (err) {
+//     console.log('MongoDB Connection Failed');
+//   } if (res) {
+//     console.log('MongoDB Connected');
+//   }
+// });
 
 const signup = require('./routes/signup');
 const login = require('./routes/login');
