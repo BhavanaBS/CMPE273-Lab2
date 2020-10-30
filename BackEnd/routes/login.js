@@ -1,62 +1,46 @@
 const express = require('express');
-const passwordHash = require('password-hash');
 const jwt = require('jsonwebtoken');
 const { auth } = require('../config/passport');
+const kafka = require('../kafka/client');
 
 const router = express.Router();
-const Customer = require('../models/cust_profile');
-const Restaurant = require('../models/rest_profile');
 const { secret } = require('../config/configuration');
 
 auth();
 
 router.post('/customers', (req, res) => {
+  req.body.url = req.url;
+
   console.log('Requested Login : ', req.body.email_id);
-  Customer.findOne({ email_id: req.body.email_id }, (error, customer) => {
-    if (error) {
-      res.status(500).end('SYS_ERROR');
-    }
-    if (!customer) {
-      res.status(401).end('CUST_INVALID');
-    }
-    if (customer) {
-      if (passwordHash.verify(req.body.password, customer.password)) {
-        console.log(customer);
-        const payload = {
-          customer_id: customer._id,
-        };
-        const token = jwt.sign(payload, secret, {
-          expiresIn: 1008000,
-        });
-        res.status(200).json({ success: true, token: `JWT ${token}` });
-      } else {
-        res.status(401).end('CUST_INVALID_CRED');
-      }
+  kafka.make_request('login', req.body, (err, results) => {
+    if (err) {
+      res.status(500).end('SYSTEM_ERROR');
+    } else if (results.status === 200) {
+      const payload = results.message;
+      const token = jwt.sign(payload, secret, {
+        expiresIn: 1008000,
+      });
+      res.json({ success: true, token: `JWT ${token}` });
+    } else {
+      res.status(results.status).end(results.message);
     }
   });
 });
 
 router.post('/restaurants', (req, res) => {
-  Restaurant.findOne({ email_id: req.body.email_id }, (error, restaurant) => {
-    if (error) {
-      res.status(500).end('SYS_ERROR');
-    }
-    if (!restaurant) {
-      res.status(401).end('REST_INVALID');
-    }
-    if (restaurant) {
-      if (passwordHash.verify(req.body.password, restaurant.password)) {
-        console.log(restaurant);
-        const payload = {
-          restaurant_id: restaurant._id,
-        };
-        const token = jwt.sign(payload, secret, {
-          expiresIn: 1008000,
-        });
-        res.status(200).json({ success: true, token: `JWT ${token}` });
-      } else {
-        res.status(401).end('REST_INVALID_CRED');
-      }
+  req.body.url = req.url;
+  console.log('Requested Login : ', req.body.email_id);
+  kafka.make_request('login', req.body, (err, results) => {
+    if (err) {
+      res.status(500).end('SYSTEM_ERROR');
+    } else if (results.status === 200) {
+      const payload = results.message;
+      const token = jwt.sign(payload, secret, {
+        expiresIn: 1008000,
+      });
+      res.json({ success: true, token: `JWT ${token}` });
+    } else {
+      res.status(results.status).end(results.message);
     }
   });
 });

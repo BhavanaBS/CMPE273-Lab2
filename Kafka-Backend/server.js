@@ -1,6 +1,8 @@
 var connection = new require('./kafka/connection');
 //topics files
 var Passport = require('./services/passport');
+var Signup = require('./services/signup');
+var Login = require('./services/login');
 
 const { mongoDB } = require('./config/configuration');
 const mongoose = require('mongoose');
@@ -61,3 +63,5 @@ function handleTopicRequest(topic_name, fname) {
 //first argument is topic name
 //second argument is a function that will handle this topic request
 handleTopicRequest("authentication", Passport);
+handleTopicRequest("signup", Signup);
+handleTopicRequest("login", Login);
