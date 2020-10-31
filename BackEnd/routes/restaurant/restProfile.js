@@ -1,34 +1,20 @@
 const express = require('express');
 const { checkAuth } = require('../../config/passport');
+const kafka = require('../../kafka/client');
 
 const router = express.Router();
-const Restaurant = require('../../models/rest_profile');
 
 router.get('/:restaurant_id', checkAuth, (req, res) => {
-  console.log('Inside Profile GET method');
-  Restaurant.findById(req.params.restaurant_id, (error, restaurant) => {
-    if (error) {
-      res.status(500).end('System Error Occured');
-    }
-    if (restaurant) {
-      console.log('Restaurant Object retrived : ', restaurant);
-      const restaurantProfile = {
-        restaurant_id: restaurant._id,
-        name: restaurant.name,
-        email_id: restaurant.email_id,
-        location: restaurant.location,
-        phone: restaurant.phone,
-        description: restaurant.description,
-        timings: restaurant.timings,
-        cuisine: restaurant.cuisine,
-        delivery_method: restaurant.delivery_method,
-        map_location: restaurant.map_location,
-      };
-      console.log('Restaurant Object mapped : ', restaurantProfile);
-      res.status(200).json(restaurantProfile);
+  req.body.path = 'restaurant_get';
+  req.body.restaurant_id = req.params.restaurant_id;
+  console.log('restProfile.js -> restaurant_get-> Authentication Completed');
+  kafka.make_request('restProfile', req.body, (err, results) => {
+    if (err) {
+      res.status(500).end('System Error');
     } else {
-      res.status(404).end('Restaurant not found');
+      res.status(results.status).end(results.message);
     }
   });
 });
+
 module.exports = router;

@@ -1,37 +1,19 @@
 const express = require('express');
 const { checkAuth } = require('../../config/passport');
+const kafka = require('../../kafka/client');
 
 const router = express.Router();
-const Customer = require('../../models/cust_profile');
 
 router.get('/:customer_id', checkAuth, (req, res) => {
-  console.log('Inside Profile GET method');
-  Customer.findById(req.params.customer_id, (error, customer) => {
-    if (error) {
-      res.status(500).end('System Error Occured');
-    }
-    if (customer) {
-      console.log('Customer Object retrived : ', customer);
-      const customerProfile = {
-        customer_id: customer._id,
-        name: customer.name,
-        email_id: customer.email_id,
-        phone: customer.phone,
-        dob: customer.dob,
-        city: customer.city,
-        state: customer.state,
-        country: customer.country,
-        nick_name: customer.nick_name,
-        about: customer.about,
-        join_date: customer.join_date,
-        favourite_restaurant: customer.favourite_restaurant,
-        favourite_hobby: customer.favourite_hobby,
-        blog_url: customer.blog_url,
-      };
-      console.log('Customer Object mapped : ', customerProfile);
-      res.status(200).json(customerProfile);
+  req.body.path = 'customer_get';
+  req.body.customer_id = req.params.customer_id;
+  console.log('custProfile.js -> customer_get-> Authentication Completed');
+
+  kafka.make_request('custProfile', req.body, (err, results) => {
+    if (err) {
+      res.status(500).end('System Error');
     } else {
-      res.status(404).end('Customer not found');
+      res.status(results.status).end(results.message);
     }
   });
 });

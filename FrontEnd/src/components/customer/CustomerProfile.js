@@ -1,6 +1,3 @@
-// Update customer profile (name, location, description, contact information, pictures of customer and dishes, timings)
-// TODO: Update the customer Image
-
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import '../../App.css';
@@ -17,16 +14,13 @@ class CustomerProfileForm extends Component {
         super(props);
         this.state = {
             fileName: "Browse Image To Upload",
-            // user_image:profile,
         };
         this.onChange = this.onChange.bind(this);
         this.onCustomerUpdate = this.onCustomerUpdate.bind(this);
-        // this.getProfilePicture = this.getProfilePicture.bind(this);
     }
 
     componentWillMount() {
         this.props.getCustomer(localStorage.getItem("customer_id"));
-        // this.getProfilePicture();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -100,24 +94,6 @@ class CustomerProfileForm extends Component {
                 console.log("Error");
             });
     }
-
-    // getProfilePicture = (e) => {
-    //     let customer_id = localStorage.getItem('customer_id');
-        
-    //     axios.get(`/customers/${customer_id}/images`)
-    //         .then(response => {
-    //             if(response.status === 200) {
-    //                 this.setState({
-    //                     user_image: `/customers/${customer_id}/images`,
-    //                 });
-    //             } else if(response.status === 404) {
-    //                 console.log("No image for the user");
-    //             }
-    //         })
-    //         .catch(err => {
-    //             console.log("Error",err);
-    //         });
-    // }
 
     render() {
 

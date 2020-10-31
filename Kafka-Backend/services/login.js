@@ -8,48 +8,51 @@ function handle_request(msg, callback) {
     if (msg.url === "/customers") {
         Customer.findOne({ email_id: msg.email_id }, (error, customer) => {
             if (error) {
-              res.status(500).end('SYS_ERROR');
+              res.status = 500;
+              res.message = 'SYS_ERROR';
             }
             if (!customer) {
-              res.status(401).end('CUST_INVALID');
+              res.status = 401;
+              res.message = 'CUST_INVALID';
             }
             if (customer) {
-              if (passwordHash.verify(req.body.password, customer.password)) {
+              if (passwordHash.verify(msg.password, customer.password)) {
                 console.log(customer);
                 const payload = {
                   customer_id: customer._id,
                 };
-                const token = jwt.sign(payload, secret, {
-                  expiresIn: 1008000,
-                });
-                res.status(200).json({ success: true, token: `JWT ${token}` });
+                
+                res.status = 200;
+                res.message = payload;
               } else {
-                res.status(401).end('CUST_INVALID_CRED');
+                res.status = 401;
+                res.message = 'CUST_INVALID_CRED';
               }
             }
             callback(null, res);
         });
 
     } else if (msg.url === "/restaurants") {
-        Restaurant.findOne({ email_id: req.body.email_id }, (error, restaurant) => {
+        Restaurant.findOne({ email_id: msg.email_id }, (error, restaurant) => {
             if (error) {
-              res.status(500).end('SYS_ERROR');
+              res.status = 500;
+              res.message = 'SYS_ERROR';
             }
             if (!restaurant) {
-              res.status(401).end('REST_INVALID');
+              res.status = 401;
+              res.message = 'REST_INVALID';
             }
             if (restaurant) {
-              if (passwordHash.verify(req.body.password, restaurant.password)) {
+              if (passwordHash.verify(msg.password, restaurant.password)) {
                 console.log(restaurant);
                 const payload = {
                   restaurant_id: restaurant._id,
                 };
-                const token = jwt.sign(payload, secret, {
-                  expiresIn: 1008000,
-                });
-                res.status(200).json({ success: true, token: `JWT ${token}` });
+                res.status = 200;
+                res.message = payload;
               } else {
-                res.status(401).end('REST_INVALID_CRED');
+                res.status = 401;
+                res.message = 'REST_INVALID_CRED';
               }
             }
             callback(null, res);

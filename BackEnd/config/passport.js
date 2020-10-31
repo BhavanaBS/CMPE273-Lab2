@@ -15,13 +15,13 @@ function auth() {
     new JwtStrategy(opts, (jwt_payload, callback) => {
       kafka.make_request('authentication', jwt_payload, function (err, results) {
         if (err) {
-          return done(err, false);
+          return callback(err, false);
         }
         if(results){
-          done(null, results);
+          callback(null, results);
         }
         else {
-          done(null, false);
+          callback(null, false);
         }
       });
     }),
