@@ -18,4 +18,16 @@ router.get('/:customer_id', checkAuth, (req, res) => {
   });
 });
 
+router.post('/update', checkAuth, (req, res) => {
+  req.body.path = 'customer_update';
+
+  kafka.make_request('custProfile', req.body, (err, results) => {
+    if (err) {
+      res.status(500).end('System Error');
+    } else {
+      res.status(results.status).end(results.message);
+    }
+  });
+});
+
 module.exports = router;

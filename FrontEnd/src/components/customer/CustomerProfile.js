@@ -4,7 +4,7 @@ import '../../App.css';
 import axios from 'axios';
 import { Card, Container, Row, Col, Button, Form, Alert } from "react-bootstrap";
 import { connect } from "react-redux";
-import { updateAboutCustomer, getCustomer } from "../../redux/action/customerActions";
+import { updateCustomerProfile, getCustomer } from "../../redux/action/customerActions";
 import { Redirect } from 'react-router';
 import backend from '../common/serverDetails';
 
@@ -16,11 +16,14 @@ class CustomerProfileForm extends Component {
             fileName: "Browse Image To Upload",
         };
         this.onChange = this.onChange.bind(this);
+        // this.onImageChange = this.onImageChange.bind(this);
         this.onCustomerUpdate = this.onCustomerUpdate.bind(this);
+        // this.onImageUpload = this.onImageUpload.bind(this);
     }
 
     componentWillMount() {
-        this.props.getCustomer(localStorage.getItem("customer_id"));
+        this.props.getCustomer();
+        // this.props.getCustomer(localStorage.getItem("customer_id"));
     }
 
     componentWillReceiveProps(nextProps) {
@@ -50,50 +53,14 @@ class CustomerProfileForm extends Component {
             [e.target.name]: e.target.value
         })
     }
-
+    
     onCustomerUpdate = (e) => {
         //prevent page from refresh
         e.preventDefault();
-        console.log("on update");
+        console.log("on update of customer profile");
         let data = Object.assign({}, this.state);
-        this.props.updateAboutCustomer(data);
+        this.props.updateCustomerProfile(data);
     };
-
-    onImageChoose = (e) => {
-        this.setState({
-            successImageUpload: false,
-            file: e.target.files[0],
-            fileName: e.target.files[0].name
-        });
-    }
-
-    onPictureUpload = (e) => {
-        e.preventDefault();
-        let customer_id = localStorage.getItem('customer_id');
-        const formData = new FormData();
-        formData.append("image", this.state.file);
-        const headers = {
-            headers: {
-                "content-type": "multipart/form-data"
-            }
-        };
-        axios.patch(`${backend}/customers/${customer_id}/images`, formData, headers)
-            .then(response => {
-                this.setState({
-                    successImageUpload: true,
-                    errorImageUpload: false,
-                    fileName: "Change Profile Image",
-                    // user_image: `/customers/${customer_id}/images`,
-                });
-            })
-            .catch(err => {
-                this.setState({
-                    successImageUpload: false,
-                    errorImageUpload: true,
-                });
-                console.log("Error");
-            });
-    }
 
     render() {
 
@@ -363,21 +330,20 @@ class CustomerProfileForm extends Component {
 }
 
 CustomerProfileForm.propTypes = {
-    updateAboutCustomer: PropTypes.func.isRequired,
-    customer: PropTypes.object.isRequired
+    updateCustomerProfile: PropTypes.func.isRequired,
+    customer: PropTypes.object.isRequired,
 }
 
 const mapStateToProps = state => {
     return {
-        showFailure: state.customer.showFailure,
-        customer: state.customer.customer,
+        customer: state.customer.customerProfile,
     };
 };
 
 function mapDispatchToProps(dispatch) {
     return {
         getCustomer: customer_id => dispatch(getCustomer(customer_id)),
-        updateAboutCustomer: data => dispatch(updateAboutCustomer(data))
+        updateCustomerProfile: data => dispatch(updateCustomerProfile(data))
     };
 }
 

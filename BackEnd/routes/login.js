@@ -20,7 +20,7 @@ router.post('/customers', (req, res) => {
       const token = jwt.sign(payload, secret, {
         expiresIn: 1008000,
       });
-      res.json({ success: true, token: `JWT ${token}` });
+      res.json({ success: true, token: `JWT ${token}` }).end();
     } else {
       res.status(results.status).end(results.message);
     }
