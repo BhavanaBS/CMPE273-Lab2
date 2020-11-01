@@ -5,6 +5,7 @@ var Signup = require('./services/signup');
 var Login = require('./services/login');
 var CustomerProfile = require('./services/customerProfile');
 var RestaurantProfile = require('./services/restaurantProfile');
+var ImageUpload = require('./services/uploads');
 
 const { mongoDB } = require('./config/configuration');
 const mongoose = require('mongoose');
@@ -69,6 +70,7 @@ handleTopicRequest("signup", Signup);
 handleTopicRequest("login", Login);
 handleTopicRequest("custProfile", CustomerProfile);
 handleTopicRequest("restProfile", RestaurantProfile);
+handleTopicRequest("imageUpload", ImageUpload);
 
 /*
 
@@ -78,6 +80,7 @@ bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 -
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic custProfile
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic restProfile
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic response_topic
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic imageUpload
 
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic authentication
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic signup
@@ -85,5 +88,6 @@ bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic login
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic custProfile
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic restProfile
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic response_topic
+bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic imageUpload
 
 */

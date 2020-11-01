@@ -5,13 +5,12 @@
 
 import React, {Component} from 'react';
 import '../../App.css';
-import cookie from 'react-cookies';
 import {Link} from 'react-router-dom';
-import {Redirect} from 'react-router';
 import { Card, Container, Table,Row, Col, Carousel} from "react-bootstrap";
-import axios from 'axios';
-import yelp_logo from "../../images/yelp.png";
 import backend from '../common/serverDetails';
+import { getRestaurant } from "../../redux/action/restaurantActions";
+import yelp_logo from "../../images/yelp.png";
+import { connect } from "react-redux";
 
 class RestaurantHome extends Component {
     constructor(props) {
@@ -19,65 +18,36 @@ class RestaurantHome extends Component {
         super(props);
         //maintain the state required for this component
         this.state = {};
-        this.getRestaurantProfile();
-        this.getRestaurantImageIds();
     }
 
-    getRestaurantImageIds = () => {
-        var restaurantId = localStorage.getItem("restaurant_id");
-        console.log("Fetching the imageIds for restaurantId ", restaurantId);
-    
-
-        axios.get(`${backend}/restaurants/${restaurantId}/images`)
-            .then(response => {
-                console.log("Status Code : ",response.status, "Response JSON : ",response.data);
-                if (response.status === 200) {
-                    if (response.data) {
-                        this.setState({
-                            restaurantImageIds: response.data
-                        });
-                    }
-                    console.log("Fetching restaurant image ids success!", this.state.restaurantDetails);
-                } else {
-                    console.log("Fetching restaurant image ids failed!");
-                }
-            })
-            .catch((error) => {
-                console.log("Fetching restaurant image ids failed!", error);
-            });
+    componentWillMount() {
+        this.props.getRestaurant(localStorage.getItem("restaurant_id"));
     }
 
-    getRestaurantProfile = () => {
-        var restaurantId = localStorage.getItem("restaurant_id");
-        console.log("Fetching the details for restaurantId ", restaurantId);
-    
-
-        axios.get(`${backend}/restaurants/${restaurantId}`)
-            .then(response => {
-                console.log("Status Code : ",response.status, "Response JSON : ",response.data);
-                if (response.status === 200) {
-                    if (response.data) {
-                        this.setState({
-                            restaurantDetails: response.data
-                        });
-                    }
-                    console.log("Fetching restaurant details success!", this.state.restaurantDetails);
-                } else {
-                    console.log("Fetching restaurant details failed!");
-                }
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.restaurant) {
+            this.setState({
+                id: nextProps.restaurant.restaurnt_id,
+                name: nextProps.restaurant.name,
+                phone: nextProps.restaurant.phone,
+                email_id: nextProps.restaurant.email_id,
+                description: nextProps.restaurant.description,
+                location: nextProps.restaurant.location,
+                timings: nextProps.restaurant.timings,
+                delivery_method: nextProps.restaurant.delivery_method,
+                map_location: nextProps.restaurant.map_location,
+                rest_images: nextProps.restaurant.rest_images
             })
-            .catch((error) => {
-                console.log("Fetching restaurant details failed!", error);
-            });
+        }
     }
 
     getImageCarouselItem = (imageId) => {
         let rest_id = localStorage.getItem("restaurant_id");
-        let imageSrcUrl = `${backend}/restaurants/${rest_id}/images/${imageId}`;
+        let imageSrcUrl = `${backend}/images/restaurants/${rest_id}/profile/${imageId}`;
         console.log(imageSrcUrl);
         return <Carousel.Item>
             <img
-            style = {{width:'60rem', height:'40rem'}}
+            style = {{width:'30rem', height:'20rem'}}
             src={imageSrcUrl}
             alt="First slide"
             />
@@ -85,17 +55,14 @@ class RestaurantHome extends Component {
     }
 
     render() {
+        console.log("State: ", this.state);
         var restaurantDetailsTable = null;
         let redirectVar = null;
         let carouselList = [], carousel;
 
-        if(!(cookie.load('cookie') && localStorage.getItem("restaurant_id"))){
-            redirectVar = <Redirect to="/" />;
-        }
-
-        if (this.state && this.state.restaurantImageIds && this.state.restaurantImageIds[0]) {
-            for (var i = 0; i < this.state.restaurantImageIds.length; i++) {
-                carousel = this.getImageCarouselItem(this.state.restaurantImageIds[i]);
+        if (this.state && this.state.rest_images && this.state.rest_images[0]) {
+            for (var i = 0; i < this.state.rest_images.length; i++) {
+                carousel = this.getImageCarouselItem(this.state.rest_images[i]);
                 carouselList.push(carousel);
             }
         } else {
@@ -110,14 +77,14 @@ class RestaurantHome extends Component {
         }
         console.log(carouselList);
 
-        if(this.state.restaurantDetails) {
+        if(this.props.restaurant) {
             restaurantDetailsTable = (<center>
                 <Card>
                 <Row>
                 <Col>
                 <br/><br/>
                     <Card.Title>
-                        <h1>{this.state.restaurantDetails.name}</h1>
+                        <h1>{this.props.restaurant.name}</h1>
                     </Card.Title>
 
                     <Carousel>
@@ -132,32 +99,32 @@ class RestaurantHome extends Component {
                                 <tr>
                                     <td >Email Id</td>
                                     <td></td>
-                                    <td align="left">{this.state.restaurantDetails.email_id}</td>
+                                    <td align="left">{this.props.restaurant.email_id}</td>
                                 </tr>
                                 <tr>
                                     <td >Location</td>
                                     <td></td>
-                                    <td align="left">{this.state.restaurantDetails.location}</td>
+                                    <td align="left">{this.props.restaurant.location}</td>
                                 </tr>
                                 <tr>
                                     <td >Phone Number</td>
                                     <td></td>
-                                    <td align="left">{this.state.restaurantDetails.phone}</td>
+                                    <td align="left">{this.props.restaurant.phone}</td>
                                 </tr>
                                 <tr>
                                     <td >Description</td>
                                     <td></td>
-                                    <td align="left">{this.state.restaurantDetails.description}</td>
+                                    <td align="left">{this.props.restaurant.description}</td>
                                 </tr>
                                 <tr>
                                     <td >Timings</td>
                                     <td></td>
-                                    <td align="left">{this.state.restaurantDetails.timings}</td>
+                                    <td align="left">{this.props.restaurant.timings}</td>
                                 </tr>
                                 <tr>
                                     <td >Delivery Method</td>
                                     <td></td>
-                                    <td align="left">{this.state.restaurantDetails.delivery_method}</td>
+                                    <td align="left">{this.props.restaurant.delivery_method}</td>
                                 </tr>
                             </tbody>
                         </Table>
@@ -187,4 +154,16 @@ class RestaurantHome extends Component {
     }
 }
 
-export default RestaurantHome;
+const mapStateToProps = state => {
+    return {
+      restaurant: state.profileState.restaurantProfile,
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        getRestaurant: restaurant_id => dispatch(getRestaurant(restaurant_id)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(RestaurantHome);

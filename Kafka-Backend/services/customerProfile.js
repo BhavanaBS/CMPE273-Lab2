@@ -27,6 +27,7 @@ function handle_request(msg, callback) {
                     favourite_restaurant: customer.favourite_restaurant,
                     favourite_hobby: customer.favourite_hobby,
                     blog_url: customer.blog_url,
+                    profile_picture: customer.profile_picture,
                 };
                 console.log('Customer Object mapped : ', customerProfile);
                 res.status = 200;
@@ -38,7 +39,7 @@ function handle_request(msg, callback) {
             callback(null, res);
         });
     } else if (msg.path === "customer_update") {
-        console.log('Inside Profile POST method');
+        console.log('Inside Profile PUT method');
         Customer.findById(msg.customer_id, (err, customer) => {
           if (err) {
             res.status = 500;
@@ -46,34 +47,36 @@ function handle_request(msg, callback) {
             callback(null, res);
           }
           if (customer) {
-            Customer.findOneAndUpdate({ _id: msg.user_id },
+            Customer.findOneAndUpdate({ _id: msg.customer_id },
               {
-                customer_id: customer._id,
-                name: customer.name,
-                email_id: customer.email_id,
-                phone: customer.phone,
-                dob: customer.dob,
-                city: customer.city,
-                state: customer.state,
-                country: customer.country,
-                nick_name: customer.nick_name,
-                about: customer.about,
-                join_date: customer.join_date,
-                favourite_restaurant: customer.favourite_restaurant,
-                favourite_hobby: customer.favourite_hobby,
-                blog_url: customer.blog_url,
+                name: msg.name,
+                phone: msg.phone,
+                dob: msg.dob,
+                city: msg.city,
+                state: msg.state,
+                country: msg.country,
+                nick_name: msg.nick_name,
+                about: msg.about,
+                favourite_restaurant: msg.favourite_restaurant,
+                favourite_hobby: msg.favourite_hobby,
+                blog_url: msg.blog_url,
               },
               {
                 new: true
               },
               (err, updatedCustomer) => {
+                console.log('updatedCustomer : ', updatedCustomer)
                 if (err) {
                   res.status = 500;
                   res.message = 'UPDATE_DATA_ERROR';
+                  console.log('UPDATE_DATA_ERROR')
                 }
                 if (updatedCustomer) {
                   res.status = 200;
-                  res.message = "CUSTOMER_UPDATED";
+                  res.message = JSON.stringify(updatedCustomer);
+                  console.log('CUSTOMER_UPDATED : ', JSON.stringify(updatedCustomer))
+                } else {
+                  console.log('Nothing happened during this call.')
                 }
                 callback(null, res);
               }

@@ -47,10 +47,10 @@ class RestaurantLoginForm extends Component{
         if (this.props.restaurant && this.props.restaurant.token) {
             console.log("---------- CUSTOMER LOGGED IN ------------")
             var decoded = jwt_decode(this.props.restaurant.token.split(' ')[1]);
-            console.log("Setting restaurant_id in Local Storage : ", decoded._id)
+            console.log("Setting restaurant_id in Local Storage : ", decoded.restaurant_id)
             localStorage.setItem("token", this.props.restaurant.token);
-            localStorage.setItem("restaurant_id", decoded._id);
-            return <Redirect to="/restaurant/home" />
+            localStorage.setItem("restaurant_id", decoded.restaurant_id);
+            return <Redirect to="/r_home" />
         } else if(this.props.restaurant === "REST_INVALID" && this.state.loginRequested){
             error = (
                 <div>

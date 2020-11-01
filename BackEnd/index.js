@@ -1,32 +1,18 @@
-// const mongoose = require('mongoose');
 const app = require('./app');
-// const { mongoDB } = require('./config/configuration');
-
-// const options = {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-//   reconnectTries: Number.MAX_VALUE,
-//   reconnectInterval: 500,
-//   poolSize: 500,
-//   bufferMaxEntries: 0,
-// };
-// mongoose.connect(mongoDB, options, (err, res) => {
-//   if (err) {
-//     console.log('MongoDB Connection Failed');
-//   } if (res) {
-//     console.log('MongoDB Connected');
-//   }
-// });
 
 const signup = require('./routes/signup');
 const login = require('./routes/login');
 const restProfile = require('./routes/restaurant/restProfile');
 const custProfile = require('./routes/customer/custProfile');
+const imageGet = require('./routes/images');
+const imageUpload = require('./routes/uploads');
 
 app.use('/signup', signup);
 app.use('/login', login);
 app.use('/profiles/restaurants', restProfile);
 app.use('/profiles/customers', custProfile);
+app.use('/images', imageGet);
+app.use('/uploads', imageUpload);
 
 const port = process.env.PORT || 3001;
 const server = app.listen(port, () => {

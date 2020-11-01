@@ -18,9 +18,9 @@ router.get('/:customer_id', checkAuth, (req, res) => {
   });
 });
 
-router.post('/update', checkAuth, (req, res) => {
+router.put('/:customer_id', checkAuth, (req, res) => {
   req.body.path = 'customer_update';
-
+  req.body.customer_id = req.params.customer_id;
   kafka.make_request('custProfile', req.body, (err, results) => {
     if (err) {
       res.status(500).end('System Error');

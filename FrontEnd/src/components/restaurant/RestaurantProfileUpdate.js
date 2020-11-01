@@ -4,10 +4,10 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import '../../App.css';
-import axios from 'axios';
 import { Carousel, Card, Container, Row, Col, Button, Form, Alert } from "react-bootstrap";
 import { connect } from "react-redux";
 import { updateRestaurant, getRestaurant } from "../../redux/action/restaurantActions";
+import { uploadRestaurantImage } from '../../redux/action/imageUploadActions';
 import { Redirect } from 'react-router';
 import yelp_logo from "../../images/yelp.png";
 import backend from '../common/serverDetails';
@@ -18,10 +18,10 @@ class RestaurantProfileForm extends Component {
         super(props);
         this.state = {
             fileName: "Browse Image To Upload",
+            rest_images: []
         };
         this.onChange = this.onChange.bind(this);
-        this.onRestaurantUpdate = this.onRestaurantUpdate.bind(this);
-        this.getRestaurantImageIds();
+        this.onImageChoose = this.onImageChoose.bind(this);
     }
 
     componentWillMount() {
@@ -29,9 +29,9 @@ class RestaurantProfileForm extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (!this.props.restaurant || this.props.restaurant.id !== nextProps.restaurant.id) {
+        if (nextProps.restaurant) {
             this.setState({
-                id: nextProps.restaurant.id,
+                id: nextProps.restaurant.restaurnt_id,
                 name: nextProps.restaurant.name,
                 phone: nextProps.restaurant.phone,
                 email_id: nextProps.restaurant.email_id,
@@ -40,7 +40,20 @@ class RestaurantProfileForm extends Component {
                 timings: nextProps.restaurant.timings,
                 delivery_method: nextProps.restaurant.delivery_method,
                 map_location: nextProps.restaurant.map_location,
+                rest_images: nextProps.restaurant.rest_images
             })
+        }
+
+        if (nextProps.rest_image_new && this.props.rest_image_new !== nextProps.rest_image_new) {
+            var { rest_image_new } = nextProps;
+
+            if (typeof rest_image_new === "string") {
+                var rest_images_in_state = this.state.rest_images;
+                this.setState({
+                    fileName: "Browse Image To Upload",
+                    rest_images: [ ...rest_images_in_state, rest_image_new]
+                });
+            }
         }
     }
 
@@ -51,41 +64,36 @@ class RestaurantProfileForm extends Component {
         })
     }
 
+    onImageChoose = (e) => {
+        this.setState({
+            file: e.target.files[0],
+            fileName: e.target.files[0].name
+        });
+    }
+
     onRestaurantUpdate = (e) => {
         //prevent page from refresh
         e.preventDefault();
-        console.log("on update");
+        console.log("on update of restaurant profile");
         let data = Object.assign({}, this.state);
         this.props.updateRestaurant(data);
     };
 
-    getRestaurantImageIds = () => {
-        var restaurantId = localStorage.getItem("restaurant_id");
-        console.log("Fetching the imageIds for restaurantId ", restaurantId);
-    
-
-        axios.get(`${backend}/restaurants/${restaurantId}/images`)
-            .then(response => {
-                console.log("Status Code : ",response.status, "Response JSON : ",response.data);
-                if (response.status === 200) {
-                    if (response.data) {
-                        this.setState({
-                            restaurantImageIds: response.data
-                        });
-                    }
-                    console.log("Fetching restaurant image ids success!", this.state.restaurantDetails);
-                } else {
-                    console.log("Fetching restaurant image ids failed!");
-                }
-            })
-            .catch((error) => {
-                console.log("Fetching restaurant image ids failed!", error);
-            });
+    onPictureUpload = (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append("image", this.state.file);
+        const imageConfig = {
+            headers: {
+                "content-type": "multipart/form-data"
+            }
+        };
+        this.props.uploadRestaurantImage(formData, imageConfig);
     }
 
     getImageCarouselItem = (imageId) => {
         let rest_id = localStorage.getItem("restaurant_id");
-        let imageSrcUrl = `${backend}/restaurants/${rest_id}/images/${imageId}`;
+        let imageSrcUrl = `${backend}/images/restaurants/${rest_id}/profile/${imageId}`;
         console.log(imageSrcUrl);
         return <Carousel.Item>
             <img
@@ -96,58 +104,19 @@ class RestaurantProfileForm extends Component {
         </Carousel.Item>
     }
 
-    onImageChoose = (e) => {
-        this.setState({
-            successImageUpload: false,
-            file: e.target.files[0],
-            fileName: e.target.files[0].name
-        });
-    }
-
-    onUpload = (e) => {
-        e.preventDefault();
-        let restaurant_id = localStorage.getItem('restaurant_id');
-        const formData = new FormData();
-        formData.append("image", this.state.file);
-        const headers = {
-            headers: {
-                "content-type": "multipart/form-data"
-            }
-        };
-        axios.post(`${backend}/restaurants/${restaurant_id}/images`, formData, headers)
-            .then(response => {
-                let restaurantImageIds= this.state.restaurantImageIds;
-                restaurantImageIds.push(response.data.image_id);
-                this.setState({
-                    successImageUpload: true,
-                    errorImageUpload: false,
-                    fileName: "Choose Image",
-                    user_image: response.data
-                });
-            })
-            .catch(err => {
-                this.setState({
-                    successImageUpload: false,
-                    errorImageUpload: true,
-                });
-                console.log("Error");
-            });
-    }
-
     render() {
-        let title;
         let carouselList = [], carousel;
-        let successImageUploadMessage;
 
         console.log("State: ", this.state);
-        let redirectVar = null;
 
-        if (localStorage.getItem("restaurant_id") === null ) {
-            redirectVar = <Redirect to="/customer/home" />
+        let redirectVar = null;
+        if (!localStorage.getItem("token") || !localStorage.getItem("restaurant_id")) {
+            redirectVar = <Redirect to="/home" />
         }
-        if (this.state && this.state.restaurantImageIds && this.state.restaurantImageIds[0]) {
-            for (var i = 0; i < this.state.restaurantImageIds.length; i++) {
-                carousel = this.getImageCarouselItem(this.state.restaurantImageIds[i]);
+
+        if (this.state && this.state.rest_images && this.state.rest_images[0]) {
+            for (var i = 0; i < this.state.rest_images.length; i++) {
+                carousel = this.getImageCarouselItem(this.state.rest_images[i]);
                 carouselList.push(carousel);
             }
         } else {
@@ -161,25 +130,25 @@ class RestaurantProfileForm extends Component {
             carouselList.push(carousel);
         }
 
-        if (this.state && this.state.successImageUpload) {
-            successImageUploadMessage = <Alert variant="success">Successfully Uploaded Image</Alert>
-        }
-
         console.log("State: ", this.state);
-        let error = null;
-        if (this.props.showFailure) {
-            error = (
+        let message = null;
+
+        if(this.props.status && this.props.status === 'RESTAURANT_UPDATE_SUCCESSFUL') {
+            message = (
                 <div>
-                    <Alert variant="danger">Update Failed!</Alert>
+                    <p style={{ color: "green" }}> Update Successful. </p>
+                </div>
+            );
+        } else if(this.props.status && this.props.status === 'RESTAURANT_UPDATE_FAILED') {
+            message = (
+                <div>
+                    <p style={{ color: "red" }}> Error Updating Customer. Please try again later. </p>
                 </div>
             );
         }
-
         return (
             <div>
             {redirectVar}
-            {successImageUploadMessage}
-            {error}
             <br/><br/><br/>
                 <Container style={{ marginLeft:'3rem', marginRight:'3rem' }} fluid={true}>
                     <Row>
@@ -190,7 +159,7 @@ class RestaurantProfileForm extends Component {
                             {carouselList}
                         </Carousel>
                         </Card>
-                        <form onSubmit={this.onUpload}><br /><br /><br />
+                        <form onSubmit={this.onPictureUpload}><br /><br /><br />
                             <div class="custom-file" style={{width: "80%"}}>
                                 <input type="file" multiple class="custom-file-input" name="image" accept="image/*" onChange={this.onImageChoose} required/>
                                 <label class="custom-file-label" for="image">{this.state.fileName}</label>
@@ -332,7 +301,7 @@ class RestaurantProfileForm extends Component {
                             </Form>
                         </Col>
                     </Row>
-                    {error}
+                    {message}
                 </Container>
             </div>
         )
@@ -346,15 +315,17 @@ RestaurantProfileForm.propTypes = {
 
 const mapStateToProps = state => {
     return {
-      restaurant: state.restaurant.restaurant,
-      showFailure: state.customer.showFailure,
+      restaurant: state.profileState.restaurantProfile,
+      status: state.profileState.status,
+      rest_image_new: state.imageState.rest_image,
     };
 };
 
 function mapDispatchToProps(dispatch) {
     return {
         getRestaurant: restaurant_id => dispatch(getRestaurant(restaurant_id)),
-        updateRestaurant: data => dispatch(updateRestaurant(data))
+        updateRestaurant: data => dispatch(updateRestaurant(data)),
+        uploadRestaurantImage: (formData, uploadConfig) => dispatch(uploadRestaurantImage(formData,uploadConfig)),
     };
 }
 

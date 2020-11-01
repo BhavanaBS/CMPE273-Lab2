@@ -46,9 +46,9 @@ class CustomerLoginForm extends Component {
         if (this.props.customer && this.props.customer.token) {
             console.log("---------- CUSTOMER LOGGED IN ------------")
             var decoded = jwt_decode(this.props.customer.token.split(' ')[1]);
-            console.log("Setting customer_id in Local Storage : ", decoded._id)
+            console.log("Setting customer_id in Local Storage : ", decoded.customer_id)
             localStorage.setItem("token", this.props.customer.token);
-            localStorage.setItem("customer_id", decoded._id);
+            localStorage.setItem("customer_id", decoded.customer_id);
             return <Redirect to="/customer/home" />
         } else if(this.props.customer === "CUST_INVALID" && this.state.loginRequested){
             error = (

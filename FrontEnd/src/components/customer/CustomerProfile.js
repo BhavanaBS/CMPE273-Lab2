@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import '../../App.css';
-import axios from 'axios';
 import { Card, Container, Row, Col, Button, Form, Alert } from "react-bootstrap";
 import { connect } from "react-redux";
 import { updateCustomerProfile, getCustomer } from "../../redux/action/customerActions";
+import { uploadCustomerImage } from '../../redux/action/imageUploadActions';
 import { Redirect } from 'react-router';
 import backend from '../common/serverDetails';
 
@@ -16,20 +16,17 @@ class CustomerProfileForm extends Component {
             fileName: "Browse Image To Upload",
         };
         this.onChange = this.onChange.bind(this);
-        // this.onImageChange = this.onImageChange.bind(this);
-        this.onCustomerUpdate = this.onCustomerUpdate.bind(this);
-        // this.onImageUpload = this.onImageUpload.bind(this);
+        this.onImageChoose = this.onImageChoose.bind(this);
     }
 
     componentWillMount() {
-        this.props.getCustomer();
-        // this.props.getCustomer(localStorage.getItem("customer_id"));
+        this.props.getCustomer(localStorage.getItem("customer_id"));
     }
 
     componentWillReceiveProps(nextProps) {
-        if (!this.props.customer || this.props.customer.id !== nextProps.customer.id) {
+        if (nextProps.customer) {
             this.setState({
-                id: nextProps.customer.id,
+                id: nextProps.customer.customer_id,
                 name: nextProps.customer.name,
                 email_id: nextProps.customer.email_id,
                 phone: nextProps.customer.phone,
@@ -42,8 +39,20 @@ class CustomerProfileForm extends Component {
                 join_date: nextProps.customer.join_date,
                 favourite_restaurant: nextProps.customer.favourite_restaurant,
                 favourite_hobby: nextProps.customer.favourite_hobby,
-                blog_url: nextProps.customer.blog_url
+                blog_url: nextProps.customer.blog_url,
+                profile_picture: nextProps.customer.profile_picture,
             })
+        } 
+
+        if (nextProps.profile_pic) {
+            var { profile_pic } = nextProps;
+
+            if (typeof profile_pic === "string") {
+                this.setState({
+                    fileName: "Browse Image To Upload",
+                    profile_picture: profile_pic
+                });
+            }
         }
     }
 
@@ -53,36 +62,54 @@ class CustomerProfileForm extends Component {
             [e.target.name]: e.target.value
         })
     }
+
+    onImageChoose = (e) => {
+        this.setState({
+            file: e.target.files[0],
+            fileName: e.target.files[0].name
+        });
+    }
     
     onCustomerUpdate = (e) => {
         //prevent page from refresh
         e.preventDefault();
-        console.log("on update of customer profile");
         let data = Object.assign({}, this.state);
+        console.log("on update of customer profile : ", data);
         this.props.updateCustomerProfile(data);
     };
+
+    onPictureUpload = (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append("image", this.state.file);
+        const imageConfig = {
+            headers: {
+                "content-type": "multipart/form-data"
+            }
+        };
+        this.props.uploadCustomerImage(formData, imageConfig);
+    }
 
     render() {
 
         let redirectVar = null;
-        if (!localStorage.getItem("customer_id")) {
-            redirectVar = <Redirect to="/r_home" />
+        if (!localStorage.getItem("token") || !localStorage.getItem("customer_id")) {
+            redirectVar = <Redirect to="/home" />
         }
 
         console.log("State: ", this.state);
-        let error = null;
-        if (this.props.showFailure) {
-            error = (
+        let message = null;
+
+        if(this.props.status && this.props.status === 'CUSTOMER_UPDATE_SUCCESSFUL') {
+            message = (
                 <div>
-                    <p style={{ color: "red" }}>Update Failed!</p>
+                    <p style={{ color: "green" }}> Update Successful. </p>
                 </div>
             );
-        }
-
-        if (this.props.customer === 'Update Successful') {
-            error = (
+        } else if(this.props.status && this.props.status === 'CUSTOMER_UPDATE_FAILED') {
+            message = (
                 <div>
-                    <p style={{ color: "green" }}>Update Success!</p>
+                    <p style={{ color: "red" }}> Error Updating Customer. Please try again later. </p>
                 </div>
             );
         }
@@ -92,21 +119,14 @@ class CustomerProfileForm extends Component {
             joinDate = this.state.join_date.slice(0,10);
         }
 
-        let successImageUploadMessage;
-        if (this.state && this.state.successImageUpload) {
-            successImageUploadMessage = <Alert variant="success">Successfully Uploaded Image</Alert>
-        }
-
         let userImage;
         if (this.state) {
-
-            userImage = <img src={`${backend}/customers/${localStorage.getItem("customer_id")}/images`} style = {{width:'30rem', height:'20rem'}}/>
+            userImage = <img src={`${backend}/images/customers/${localStorage.getItem("customer_id")}/profile/${this.state.profile_picture}`} style = {{width:'30rem', height:'20rem'}}/>
         }
-
+        
         return (
             <div>
             {redirectVar}
-            {successImageUploadMessage}
                 <Container fluid={true}>
                 <br/><br/><br/>
 
@@ -321,7 +341,7 @@ class CustomerProfileForm extends Component {
                             </Form>
                         </Col>
                     </Row>
-                    {error}
+                    {message}
                     <br/><br/>
                 </Container>
             </div>
@@ -334,16 +354,17 @@ CustomerProfileForm.propTypes = {
     customer: PropTypes.object.isRequired,
 }
 
-const mapStateToProps = state => {
-    return {
-        customer: state.customer.customerProfile,
-    };
-};
+const mapStateToProps = state => ({
+    customer: state.profileState.customerProfile,
+    status: state.profileState.status,
+    profile_pic: state.imageState.cust_image,
+});
 
 function mapDispatchToProps(dispatch) {
     return {
         getCustomer: customer_id => dispatch(getCustomer(customer_id)),
-        updateCustomerProfile: data => dispatch(updateCustomerProfile(data))
+        updateCustomerProfile: data => dispatch(updateCustomerProfile(data)),
+        uploadCustomerImage: (formData, uploadConfig) => dispatch(uploadCustomerImage(formData,uploadConfig)),
     };
 }
 
