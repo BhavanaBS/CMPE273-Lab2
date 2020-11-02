@@ -4,6 +4,7 @@ import signupReducer from './signupReducer'
 import loginReducer from './loginReducer'
 import imageUploadReducer from './imageUploadReducer'
 import restaurantSearchReducer from './restaurantSearchReducer'
+import reviewsReducer from './reviewsReducer'
 
 export default combineReducers({
     profileState: profileReducer,
@@ -11,4 +12,5 @@ export default combineReducers({
     loginState: loginReducer,
     imageState: imageUploadReducer,
     restaurantSearchState: restaurantSearchReducer,
+    reviewsState: reviewsReducer,
 })

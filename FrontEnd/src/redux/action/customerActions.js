@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CUSTOMER_PROFILE_GET, CUSTOMER_PROFILE_UPDATE, SEARCH_RESTAURANT, GET_RESTAURANT_DETAILS} from "./actions";
+import { CUSTOMER_PROFILE_GET, CUSTOMER_PROFILE_UPDATE, SEARCH_RESTAURANT, GET_RESTAURANT_DETAILS } from "./actions";
 import backend from '../../components/common/serverDetails';
 
 export const getCustomer = (customerId) => dispatch => {
@@ -107,3 +107,4 @@ export const getRestaurantDetails = (restaurant_id) => dispatch => {
             }
         });
 }
+

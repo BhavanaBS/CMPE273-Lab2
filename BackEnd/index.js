@@ -7,6 +7,7 @@ const custProfile = require('./routes/customer/custProfile');
 const imageGet = require('./routes/images');
 const imageUpload = require('./routes/uploads');
 const restaurantSearch = require('./routes/customer/restaurantSearch');
+const reviews = require('./routes/reviews');
 
 app.use('/signup', signup);
 app.use('/login', login);
@@ -15,6 +16,7 @@ app.use('/profiles/customers', custProfile);
 app.use('/images', imageGet);
 app.use('/uploads', imageUpload);
 app.use('/restaurantSearch', restaurantSearch);
+app.use('/reviews', reviews);
 
 const port = process.env.PORT || 3001;
 const server = app.listen(port, () => {

@@ -8,6 +8,8 @@ import axios from 'axios';
 import CustomerMenuDish from './CustomerMenuDish';
 import yelp_logo from "../../images/yelp_logo.png";
 import backend from '../common/serverDetails';
+import { postRestaurantReview } from "../../redux/action/reviewsAction";
+import { connect } from "react-redux";
 
 class CustomersRestaurantView extends Component {
     constructor(props) {
@@ -17,7 +19,6 @@ class CustomersRestaurantView extends Component {
             errorReviewFlag:false,
             successReviewFlag:false,
         });
-        this.onReviewSubmit = this.onReviewSubmit.bind(this);
     }
 
     componentWillMount () {
@@ -49,31 +50,14 @@ class CustomersRestaurantView extends Component {
     onReviewSubmit = (e) => {
         //prevent page from refresh
         e.preventDefault();
-        console.log("on update");
-        let data = Object.assign({}, this.state.reviews, {rest_id: this.state.resData.id});
-        axios.defaults.withCredentials = true;
-        //make a post request with the user data
-        axios.post(`${backend}/customers/${localStorage.getItem("customer_id")}/reviews`, data)
-            .then(response => {
-                console.log("Review Creation Status : ",response.status, "Response JSON : ",response.data);
-                if (response.status !== 200) {
-                    this.setState({
-                        errorReviewFlag : true,
-                        successReviewFlag : false,
-                    });
-                } else if (response.status === 200) {
-                    this.setState({
-                        errorReviewFlag : false,
-                        successReviewFlag : true,
-                    });
-                }
-            })
-            .catch((error) => {
-                console.log("Review Creation Failed!", error);
-                this.setState({
-                    errorReviewFlag : true,
-                });
-            });
+        let reviewPayload = {
+            restaurant_id : this.state.resData._id,
+            customer_id : localStorage.getItem('customer_id'),
+            rating : this.state.reviews.rating,
+            review : this.state.reviews.review,
+        }
+        console.log("on update of review : ", reviewPayload);
+        this.props.postRestaurantReview(reviewPayload);
     };
 
     onReviewChange = e => {
@@ -235,15 +219,17 @@ class CustomersRestaurantView extends Component {
         }
 
         let reviewSubmissionStatus;
-        if(this.state && this.state.successReviewFlag) {
+        if(this.props.status && this.props.status === 'RESTAURANT_REVIEW_POST_SUCCESSFUL') {
             reviewSubmissionStatus = <div style={{marginLeft:'5rem'}}>
+            <br/>
             <p style={{color:"green"}}>
             Review Submitted Successfully!
             </p>
             </div>
         }
-        if(this.state && this.state.errorReviewFlag) {
+        if(this.props.status && this.props.status === 'RESTAURANT_REVIEW_POST_FAILED') {
             reviewSubmissionStatus = <div style={{marginLeft:'5rem'}}>
+            <br/>
             <p style={{color:"red"}}>
             Review Submit Failed!
             </p>
@@ -274,4 +260,16 @@ class CustomersRestaurantView extends Component {
     }
 }
 
-export default CustomersRestaurantView;
+const mapStateToProps = state => {
+    return {
+      status: state.reviewsState.status,
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        postRestaurantReview: data => dispatch(postRestaurantReview(data)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CustomersRestaurantView);
