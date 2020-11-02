@@ -1,5 +1,4 @@
 const Restaurant = require('../models/rest_profile');
-const passwordHash = require('password-hash');
 
 function handle_request(msg, callback) {
     var res = {};

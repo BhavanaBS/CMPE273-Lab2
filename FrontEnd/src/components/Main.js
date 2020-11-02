@@ -7,6 +7,7 @@ import customerLogin from './customer/CustomerLogin';
 import customerSignup from './customer/CustomerSignup';
 import customerHome from './customer/CustomerHome';
 import customerProfile from './customer/CustomerProfile';
+import restaurantViewPage from './customer/CustomersRestaurantView';
 
 import restaurantHome from './restaurant/RestaurantHome';
 import restaurantLogin from './restaurant/RestaurantLogin';
@@ -26,6 +27,7 @@ class Main extends Component {
                 <Route path="/c_signup" component={customerSignup}/>
                 <Route path="/customer/home" component={customerHome}/>
                 <Route path="/c_profile" component={customerProfile}/>
+                <Route path="/customer/restaurant/*" component={restaurantViewPage}/>
 
                 <Route path="/r_login" component={restaurantLogin}/>
                 <Route path="/r_signup" component={restaurantSignup}/>

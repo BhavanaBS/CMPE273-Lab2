@@ -5,76 +5,54 @@
 // 4. Show each restaurant respective location on map via pins(You can use google map API for this).
 
 import React, { Component } from 'react';
-import axios from 'axios';
-import { InputGroup, FormControl, Button, DropdownButton, ListGroup, Row, Col, Dropdown} from 'react-bootstrap';
+import { InputGroup, FormControl, Button, DropdownButton, ListGroup, Row, Col, Dropdown, Alert, Pagination} from 'react-bootstrap';
 import CustomerRestaurantSearchCard from './CustomerRestaurantSearchCard';
 import ReactGoogleMaps from "./ReactGoogleMaps";
-import backend from '../common/serverDetails';
-
-import {
-    withGoogleMap,
-    GoogleMap,
-    Marker,
-  } from "react-google-maps";
-
-import maps from '../../images/google.png';
-var geocoder = require('google-geocoder');
+import { getRestaurantSearch } from "../../redux/action/customerActions";
+import { connect } from "react-redux";
+import PropTypes from 'prop-types';
 
 class CustomerHome extends Component {
     constructor(props) {
         super(props);
         this.setState({
-            search_variable: "",
+            search_input: "",
             noRecord: false
         });
-        this.restSearch = this.restSearch.bind(this);
+
         this.onChange = this.onChange.bind(this);
         this.onSearchSubmit = this.onSearchSubmit.bind(this);
+        this.changePage = this.changePage.bind(this);
+        this.onLocationSelect = this.onLocationSelect.bind(this);
+        this.onDeliveryMethodSelect = this.onDeliveryMethodSelect.bind(this);
     }
 
-    restSearch = (search_variable) => {
-        axios.defaults.withCredentials = true;
-        //make a post request with the user data
-        axios.get(`${backend}/restaurants?search=${search_variable}`)
-            .then(response => {
-                var locations = [];
-                var deliveryMethods = [];
-                if (response.data) {
-                    if (! response.data[0]) {
-                        this.setState({
-                            noRecord: true,
-                            search_variable: "",
-                            deliveryList: ["Home Delivery" ,"Dine In", "Pick Up"],
-                        });
-                    }
-                    else {
-                        for (var i = 0; i < response.data.length; i++) {
-                            if(!locations.includes(response.data[i].location))
-                                locations.push(response.data[i].location)
-                            if(!deliveryMethods.includes(response.data[i].delivery_method))
-                                deliveryMethods.push(response.data[i].delivery_method)
-                    }
-                    this.setState({
-                        restaurantsToDisplay: response.data,
-                        locationList: locations,
-                        deliveryList: ["Home Delivery" ,"Dine In", "Pick Up"],
-                    });
-                    }
-                }
-            })
-            .catch(error => {
-                if (error.response && error.response.data) {
-                    console.log(error.response.data);
-                }
-            })
-    }
-
+    
     componentDidMount() {
-        this.restSearch("");
-        this.setState({
-            search_variable: "",
-            noRecord: false
-        });
+        this.props.getRestaurantSearch("_");
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.searchResult) {
+            var { searchResult } = nextProps;
+
+            if(searchResult.noRecord){
+                this.setState({
+                    noRecord: searchResult.noRecord,
+                    displayRestaurants: [],
+                    locationsList: [],
+                    deliverMethodsList: []
+                });
+            } else {
+                console.log('CustomerHome -> componentWillReceiveProps -> searchResult : ', searchResult);
+                this.setState({
+                        restaurantList: searchResult.restaurantList,
+                        displayRestaurants: searchResult.restaurantList,
+                        locationsList: searchResult.locationsList,
+                        deliverMethodsList: searchResult.deliverMethodsList
+                });
+            }
+        }
     }
 
     onChange = (e) => {
@@ -86,80 +64,67 @@ class CustomerHome extends Component {
 
     onSearchSubmit = (e) => {
         e.preventDefault();
-        axios.defaults.withCredentials = true;
-        //make a post request with the user data
-        axios.get(`${backend}/restaurants?search=${this.state.search_variable}`)
-            .then(response => {
-                var locations = [];
-                var deliveryMethods = [];
-                if (response.data) {
-                    if (! response.data[0]) {
-                        this.setState({
-                            noRecord: true,
-                            search_variable: ""
-                        });
-                    }
-                    else {
-                        for (var i = 0; i < response.data.length; i++) {
-                            if(!locations.includes(response.data[i].location))
-                                locations.push(response.data[i].location)
-                            if(!deliveryMethods.includes(response.data[i].delivery_method))
-                                deliveryMethods.push(response.data[i].delivery_method)
-                        }
-                        this.setState({
-                            restaurantsToDisplay: response.data,
-                            locationList: locations,
-                            deliveryList: ["Home Delivery" ,"Dine In", "Pick Up"],
-                        });
-                    }
-                }
-            })
-            .catch(error => {
-                if (error.response && error.response.data) {
-                    console.log(error.response.data);
-                }
-            })
+        if (this.state) {
+            var searchInput = typeof this.state.search_input === "undefined" || this.state.search_input === "" ? "_" : this.state.search_input;
+            this.props.getRestaurantSearch(searchInput);
+            this.setState({
+                activePage: 1
+            });
+        }
     }
 
-    onLocationSelect = (e) => {
-        var filteredList = this.state.restaurantsToDisplay.filter(restaurant => restaurant.location === e.target.text);
+    changePage = (e) => {
+        let page = this.state.activePage;
+        if (e.target.text === ">" && page !== parseInt(e.target.name)) {
+            page += 1;
+        } else if (e.target.text === "<" && page !== parseInt(e.target.name)) {
+            page -= 1;
+        } else {
+            page = parseInt(e.target.name);
+        }
         this.setState({
-            restaurantsToDisplay: filteredList
+            activePage: page
         });
+    };
+
+    onLocationSelect = (e) => {
+        var filteredList = this.state.restaurantList.filter(restaurant => restaurant.location === e.target.text);
+        this.setState({
+            displayRestaurants: filteredList,
+            activePage: 1
+        });
+        console.log('CustomerHome -> onLocationSelect -> filteredList of restaurants : ', filteredList);
     }
 
     onDeliveryMethodSelect = (e) => {
-        var filteredList = this.state.restaurantsToDisplay.filter(restaurant => restaurant.delivery_method.includes(e.target.text));
+        var filteredList = this.state.restaurantList
+            .filter(restaurant => restaurant.delivery_method !== null)
+            .filter(restaurant => restaurant.delivery_method.includes(e.target.text));
         this.setState({
-            restaurantsToDisplay: filteredList
+            displayRestaurants: filteredList,
+            activePage: 1
         });
+        console.log('CustomerHome -> onDeliveryMethodSelect -> filteredList of restaurants : ', filteredList);
     }
 
     render() {
-        let restaurntsDisplay = null;
-        let googleMapsLocations = null;
-        let url;
-        if (this.state && this.state.restaurantsToDisplay) {
-            restaurntsDisplay = this.state.restaurantsToDisplay.map(restaurantToDisplay => {
-                return (
-                    <CustomerRestaurantSearchCard key={restaurantToDisplay.id} restaurant={restaurantToDisplay}></CustomerRestaurantSearchCard>
-                )
-            })
 
-        var locations=[];
-        this.state.restaurantsToDisplay.map(restaurantToDisplay => {
-            locations.push({
-                lat: parseFloat(restaurantToDisplay.map_location.split(",")[0]), 
-                lng: parseFloat(restaurantToDisplay.map_location.split(",")[1]), 
-            });
-        })
+        var locationDropdown = null,
+            deliveryMethodDropdown = null,
+            restaurantCards = [],
+            resCard = null,
+            pagesBar = null,
+            active = 1,
+            itemsToShow = 4,
+            noRecordMessage = null;
 
-        console.log("Google Maps Location Pins", locations)
+        if (this.state && this.state.activePage) {
+            active = this.state.activePage;
         }
 
-        var locationDropdown = null;
-        if (this.state && this.state.locationList) {
-            locationDropdown = this.state.locationList.map(location => {
+        if (this.state && this.state.locationsList) {
+            console.log("LocationList for Location Dropdown in Customer Home Page : ", this.state.locationsList);
+            locationDropdown = this.state.locationsList.map(location => {
                 console.log("locationDropdown");
                 return (
                     <Dropdown.Item href="#" onClick={this.onLocationSelect}>{location}</Dropdown.Item>
@@ -167,14 +132,81 @@ class CustomerHome extends Component {
             })
         }
 
-        var deliveryMethodDropdown = null;
-        if (this.state && this.state.deliveryList) {
-            deliveryMethodDropdown = this.state.deliveryList.map(deliveryType => {
+        if (this.state && this.state.deliverMethodsList) {
+            console.log("deliveryList for Delivery Dropdown in Customer Home Page : ", this.state.deliverMethodsList);
+            deliveryMethodDropdown = this.state.deliverMethodsList.map(deliveryType => {
                 console.log("deliveryMethodDropdown");
                 return (
                     <Dropdown.Item href="#" onClick={this.onDeliveryMethodSelect}>{deliveryType}</Dropdown.Item>
                 )
             })
+        }
+
+        if (this.state && this.state.noRecord && this.state.search_input === "") {
+            noRecordMessage = (
+                <Alert variant="warning">
+                    No restaurants have partnered with us.
+                </Alert>
+            );
+        }
+        else if (this.state && this.state.noRecord) {
+            noRecordMessage = (
+                <Alert variant="warning">
+                    No restaurants have partnered with us.
+                </Alert>
+            );
+        }
+        else {
+            noRecordMessage = null;
+        }
+
+        if (this.state && this.state.displayRestaurants) {
+            let restaurants = this.state.displayRestaurants;
+            let cardCount = 0;
+            for (let i = (active - 1) * itemsToShow; i < restaurants.length; i++) {
+                resCard = (
+                    <Col sm={3}>
+                        <CustomerRestaurantSearchCard key={restaurants[i]._id} restaurant={restaurants[i]} />
+                    </Col>
+                );
+                restaurantCards.push(resCard);
+                cardCount++;
+                if (cardCount === itemsToShow)
+                    break;
+            }
+
+            let pages = [];
+            let pageCount = Math.ceil(restaurants.length / itemsToShow);
+
+            for (let i = 1; i <= pageCount; i++) {
+                pages.push(
+                    <Pagination.Item key={i} active={i === active} name={i} onClick={this.changePage}>
+                        {i}
+                    </Pagination.Item>
+                );
+            }
+            pagesBar = (
+                <div>
+                    <br />
+                    <Pagination>
+                        <Pagination.Prev name="1" onClick={this.changePage} />
+                        {pages}
+                        <Pagination.Next name={pageCount} onClick={this.changePage} />
+                    </Pagination>
+                </div>
+            );
+
+            var locations=[];
+            this.state.displayRestaurants
+                .filter(restaurantToDisplay => restaurantToDisplay.map_location !== null)
+                .map(restaurantToDisplay => {
+                    locations.push({
+                        lat: parseFloat(restaurantToDisplay.map_location.split(",")[0]), 
+                        lng: parseFloat(restaurantToDisplay.map_location.split(",")[1]), 
+                    });
+                })
+            
+            console.log("Google Maps Location Pins", locations)
         }
 
         let googleMaps =null;
@@ -188,6 +220,29 @@ class CustomerHome extends Component {
                 />
         }
 
+        // ---
+
+        // let restaurntsDisplay = null;
+        // if (this.state && this.state.restaurantsToDisplay) {
+        //     restaurntsDisplay = this.state.restaurantsToDisplay.map(restaurantToDisplay => {
+        //         return (
+        //             <CustomerRestaurantSearchCard key={restaurantToDisplay.id} restaurant={restaurantToDisplay}></CustomerRestaurantSearchCard>
+        //         )
+        //     })
+
+        // var locations=[];
+        // this.state.displayRestaurants.map(restaurantToDisplay => {
+        //     locations.push({
+        //         lat: parseFloat(restaurantToDisplay.map_location.split(",")[0]), 
+        //         lng: parseFloat(restaurantToDisplay.map_location.split(",")[1]), 
+        //     });
+        // })
+
+        // console.log("Google Maps Location Pins", locations)
+        // }
+
+        // ---
+
         return (
             <div>
                 <center>
@@ -198,7 +253,7 @@ class CustomerHome extends Component {
                             placeholder="Enter Restaurant Name"
                             aria-label="Search Restaurants"
                             aria-describedby="basic-addon2"
-                            name="search_variable"
+                            name="search_input"
                             onChange={this.onChange}
                         />
                         <InputGroup.Append>
@@ -222,16 +277,21 @@ class CustomerHome extends Component {
                         </DropdownButton>
                     </InputGroup>
                 </form>
+                {noRecordMessage}
                 </center>
                 <Row>
                 <Col style={{ margin: '2rem', width: '20rem' }}>
                 <ListGroup style={{ width: '20rem' }}>
-                    {restaurntsDisplay}
+                    {restaurantCards}
                 </ListGroup>
                 </Col>
-               <Col align='right' style={{ margin: '4rem', width: '20rem' }}>
+                <Col align='right' style={{ margin: '4rem', width: '20rem' }}>
                 {googleMaps}
                 </Col>
+               </Row>
+               <Row>
+                    <Col sm={5}></Col>
+                    <Col>{pagesBar}</Col>
                </Row>
             </div>
 
@@ -239,4 +299,13 @@ class CustomerHome extends Component {
     }
 }
 
-export default CustomerHome;
+CustomerHome.propTypes = {
+    getRestaurantSearch: PropTypes.func.isRequired,
+    searchResult: PropTypes.object.isRequired
+};
+
+const mapStateToProps = state => ({
+    searchResult: state.restaurantSearchState.restaurant_data
+});
+
+export default connect(mapStateToProps, { getRestaurantSearch })(CustomerHome);
