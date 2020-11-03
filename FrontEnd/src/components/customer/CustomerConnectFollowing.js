@@ -4,7 +4,7 @@ import { getCustomerRegisteredEvents } from '../../redux/action/eventActions'
 import { Container, Alert, Button } from "react-bootstrap";
 import Event from "./Event";
 
-class CustomerEventsRegistered extends Component {
+class CustomerConnectFollowing extends Component {
     constructor(props) {
         super(props);
         this.setState({
@@ -68,11 +68,11 @@ class CustomerEventsRegistered extends Component {
             <Container className="justify-content">
             <center>
             <br />
-            <h3>Registered Events</h3>
+            <h3>Following Yelpers</h3>
             {message}
             
             {eventRender}
-            <Button href="/c_events/view"> View All Event List</Button>
+            <Button href="/c_events/view"> View All Yelpers List</Button>
             <br/>
             <br />
             </center>
@@ -91,4 +91,4 @@ function mapDispatchToProps(dispatch) {
     };
 }
       
-export default connect(mapStateToProps, mapDispatchToProps)(CustomerEventsRegistered);
+export default connect(mapStateToProps, mapDispatchToProps)(CustomerConnectFollowing);

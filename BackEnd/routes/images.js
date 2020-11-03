@@ -22,4 +22,13 @@ router.get('/restaurants/:restaurant_id/profile/:rest_image', (req, res) => {
   }
 });
 
+router.get('/dishes/:dish_idi/details/:dish_image', (req, res) => {
+  const image = `${path.join(__dirname, '..')}/public/uploads/dishes/${req.params.dish_image}`;
+  if (fs.existsSync(image)) {
+    res.sendFile(image);
+  } else {
+    res.sendFile(`${path.join(__dirname, '..')}/public/uploads/dishes/yelp.png`);
+  }
+});
+
 module.exports = router;

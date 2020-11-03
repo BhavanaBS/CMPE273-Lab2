@@ -30,8 +30,13 @@ router.post('/restaurants', checkAuth, (req, res) => {
   });
 });
 
-router.get('/customers/asc', checkAuth, (req, res) => {
-  req.body.path = 'customer_event_get_asc';
+router.get('/customers', checkAuth, (req, res) => {
+  req.body.search = req.query.search;
+  if (req.query.order === 'asc') {
+    req.body.path = 'customer_event_get_asc';
+  } else {
+    req.body.path = 'customer_event_get_desc';
+  }
   req.body.restaurant_id = req.params.restaurant_id;
   console.log('events.js -> customer_event_get_asc-> Authentication Completed');
   kafka.make_request('events', req.body, (err, results) => {

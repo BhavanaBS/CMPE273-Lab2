@@ -9,6 +9,8 @@ const imageUpload = require('./routes/uploads');
 const restaurantSearch = require('./routes/customer/restaurantSearch');
 const reviews = require('./routes/reviews');
 const events = require('./routes/events');
+const dishes = require('./routes/dishes');
+const orders = require('./routes/orders');
 
 app.use('/signup', signup);
 app.use('/login', login);
@@ -19,6 +21,8 @@ app.use('/uploads', imageUpload);
 app.use('/restaurantSearch', restaurantSearch);
 app.use('/reviews', reviews);
 app.use('/events', events);
+app.use('/dishes', dishes);
+app.use('/orders', orders);
 
 const port = process.env.PORT || 3001;
 const server = app.listen(port, () => {

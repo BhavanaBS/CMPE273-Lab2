@@ -1,8 +1,9 @@
-import { RESTAURANT_EVENTS_GET, RESTAURANT_EVENT_POST } from "../action/actions";
+import { RESTAURANT_EVENTS_GET, RESTAURANT_EVENT_POST, CUSTOMER_EVENTS, CUSTOMER_REGISTERED_EVENTS } from "../action/actions";
 
 const initialState = {
     restaurantEventAdd: {},
     restaurantEvents: {},
+    customerRegisteredEvents: {},
     status: null,
 };
 
@@ -22,7 +23,21 @@ const reviewRestaurant = (state = initialState, action) => {
                 restaurantEventAdd: action.payload,
                 //restaurantEvents: restaurantEvents,
                 status: action.status,
-            };        
+            };
+        case CUSTOMER_EVENTS:  
+            return {
+                ...state,
+                customerEvents: action.payload,
+                //restaurantEvents: restaurantEvents,
+                status: action.status,
+            };
+        case CUSTOMER_REGISTERED_EVENTS: 
+            return {
+                ...state,
+                customerRegisteredEvents: action.payload,
+                //restaurantEvents: restaurantEvents,
+                status: action.status,
+            };           
         default:
             return state;
     }

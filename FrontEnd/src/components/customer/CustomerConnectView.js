@@ -1,15 +1,21 @@
-// View list of upcoming events in the order of increasing date
+// View list of users using yelp
+// Search for user(using user’s first name or nickname)
+// Filter the results based on their Location
+// Click on user’s Name to view user’s profile
+// Follow any user by clicking follow button in their profile
+// Filter users based on following
+// Pagination should be implemented
 
 import React, { Component } from 'react';
 import { connect } from "react-redux";
 import axios from 'axios';
-import { Container, Alert, InputGroup, FormControl, Button } from "react-bootstrap";
+import { Container, Alert, InputGroup, FormControl, Button, DropdownButton } from "react-bootstrap";
 import Event from "./Event";
 import backend from '../common/serverDetails';
 import { getCustomerEvents, getCustomerRegisteredEvents } from '../../redux/action/eventActions'
 
 
-class CustomerEventsView extends Component {
+class CustomerConnectView extends Component {
     constructor(props) {
         super(props);
         this.setState({
@@ -100,19 +106,20 @@ class CustomerEventsView extends Component {
     
     render() {
         let message = null,
-        restEvent,
-            eventRender = [];
+            restEvent,
+            eventRender = [],
+            locationDropdown = [];
 
         if (this.state && this.state.errorFlag) {
             message = <Alert variant="warning">Unable to Fetch Events. PLease retry in sometime</Alert>;
         }
 
         if (this.state && !this.state.events) {
-            message = <Alert variant="warning">No Events</Alert>;
+            message = <Alert variant="warning">No Yelpers Registered.</Alert>;
         }
 
         if (this.state && this.state.noRecord) {
-            message = <Alert variant="warning">No Events for the search</Alert>;
+            message = <Alert variant="warning">No Yelpers for the search</Alert>;
         }
         
         if (this.state && this.state.events && this.state.events.length > 0) {
@@ -124,15 +131,15 @@ class CustomerEventsView extends Component {
 
         return (
             <Container className="justify-content">
-            <br />
+            <br/>
             <center>
-            <h3>Events</h3>
-            <br />
+            <h3>Connect To Yelpers</h3>
+            <br/>
             
             <form onSubmit={this.onSearchSubmit}>
                 <InputGroup style={{ width: '50%' }} size="lg">
                     <FormControl
-                        placeholder="Search Event By Name"
+                        placeholder="Search Yelper By Name"
                         aria-label="Search Events"
                         aria-describedby="basic-addon2"
                         name="search_input"
@@ -141,6 +148,14 @@ class CustomerEventsView extends Component {
                     <InputGroup.Append>
                         <Button variant="primary" type="submit">Search</Button>
                     </InputGroup.Append>
+                    <DropdownButton
+                            as={InputGroup.Append}
+                            variant="outline-secondary"
+                            title="Location"
+                            id="input-group-dropdown-2"
+                        >
+                        {locationDropdown}
+                    </DropdownButton>
                     </InputGroup>
                 </form>
             {message}
@@ -164,4 +179,4 @@ function mapDispatchToProps(dispatch) {
     };
 }
       
-export default connect(mapStateToProps, mapDispatchToProps)(CustomerEventsView);
+export default connect(mapStateToProps, mapDispatchToProps)(CustomerConnectView);

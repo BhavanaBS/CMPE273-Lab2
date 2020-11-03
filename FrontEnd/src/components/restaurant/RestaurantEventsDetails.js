@@ -28,8 +28,8 @@ class RestaurantEventsDetails extends Component {
     participantView = (index, participant) => {
         return <tr>
             <td>{index}</td>
-            <td>{participant.cust_name}</td>
-            <td><Button name={participant.cust_id} onClick={this.onDetailsClick}>View {participant.cust_name}'s Profile</Button></td>
+            <td>{participant.name}</td>
+            <td><Button name={participant._id} onClick={this.onDetailsClick}>View {participant.name}'s Profile</Button></td>
         </tr>
     }
 
@@ -75,8 +75,8 @@ class RestaurantEventsDetails extends Component {
         }
 
         if (this.state && this.state.modalParticipantId) {
-            modalParticipant = this.state.event.participants.find(p => p.cust_id === parseInt(this.state.modalParticipantId, 10));
-            modalParticipantImgSrc = `${backend}/customers/${modalParticipant.cust_id}/images`;
+            modalParticipant = this.state.event.participants.find(p => p._id === this.state.modalParticipantId);
+            modalParticipantImgSrc = `${backend}/images/customers/${modalParticipant._id}/profile/${modalParticipant.profile_picture}`;
             detailsModal = <Modal
                                 show={true}
                                 backdrop="static"
@@ -95,35 +95,35 @@ class RestaurantEventsDetails extends Component {
                                         <tbody>
                                             <tr>
                                                 <td>Name</td>
-                                                <td>{modalParticipant.cust_name}</td>
+                                                <td>{modalParticipant.name}</td>
                                             </tr>
                                             <tr>
                                                 <td>Phone</td>
-                                                <td>{modalParticipant.cust_phone}</td>
+                                                <td>{modalParticipant.phone}</td>
                                             </tr>
                                             <tr>
                                                 <td>Email Id</td>
-                                                <td>{modalParticipant.cust_email_id}</td>
+                                                <td>{modalParticipant.email_id}</td>
                                             </tr>
                                             <tr>
                                                 <td>Address</td>
-                                                <td>{modalParticipant.cust_address}</td>
+                                                <td>{modalParticipant.address}</td>
                                             </tr>
                                             <tr>
                                                 <td>Birth Date</td>
-                                                <td>{modalParticipant.cust_dob}</td>
+                                                <td>{modalParticipant.dob}</td>
                                             </tr>
                                             <tr>
                                                 <td>About</td>
-                                                <td>{modalParticipant.cust_about}</td>
+                                                <td>{modalParticipant.about}</td>
                                             </tr>
                                             <tr>
                                                 <td>Yelping Since</td>
-                                                <td>{this.getLocaleTime(modalParticipant.cust_join_date)}</td>
+                                                <td>{this.getLocaleTime(modalParticipant.join_date)}</td>
                                             </tr>
                                             <tr>
                                                 <td>Blog</td>
-                                                <td>{modalParticipant.cust_blog_url}</td>
+                                                <td>{modalParticipant.blog_url}</td>
                                             </tr>
                                         </tbody>
                                     </Table>

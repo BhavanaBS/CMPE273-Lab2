@@ -9,6 +9,8 @@ var ImageUpload = require('./services/uploads');
 var Restaurants = require('./services/restaurants');
 var Reviews = require('./services/reviews');
 var Events = require('./services/events');
+var Dishes = require('./services/dishes');
+var Orders = require('./services/orders');
 
 const { mongoDB } = require('./config/configuration');
 const mongoose = require('mongoose');
@@ -77,6 +79,10 @@ handleTopicRequest("imageUpload", ImageUpload);
 handleTopicRequest("restaurants", Restaurants);
 handleTopicRequest("reviews", Reviews);
 handleTopicRequest("events", Events);
+handleTopicRequest("orders", Orders);
+handleTopicRequest("dishes", Dishes);
+// handleTopicRequest("messages", Events);
+// handleTopicRequest("follow", Events);
 
 /*
 
@@ -90,6 +96,10 @@ bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 -
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic restaurants
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic reviews
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic events
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic orders
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic dishes
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic messages
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic follow
 
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic authentication
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic signup
@@ -101,5 +111,8 @@ bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic imageUpload
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic restaurants
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic reviews
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic events
-
+bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic orders
+bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic dishes
+bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic messages
+bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic follow
 */

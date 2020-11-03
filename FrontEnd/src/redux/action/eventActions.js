@@ -1,6 +1,51 @@
 import axios from 'axios';
-import { RESTAURANT_EVENTS_GET, RESTAURANT_EVENT_POST} from '../action/actions';
+import { RESTAURANT_EVENTS_GET, 
+    RESTAURANT_EVENT_POST, 
+    CUSTOMER_EVENTS, 
+    CUSTOMER_REGISTERED_EVENTS } from '../action/actions';
 import backend from '../../components/common/serverDetails';
+
+export const getCustomerRegisteredEvents = (customer_id) => dispatch => {
+    console.log("eventActions -> getCustomerRegisteredEvents -> method entered");
+    axios.defaults.headers.common['authorization']= localStorage.getItem('token');
+    axios.get(`${backend}/events/customers/registered/${customer_id}`)
+    .then(response => dispatch({
+        type: CUSTOMER_REGISTERED_EVENTS,
+        payload: response.data,
+        status: 'CUSTOMER_REGISTERED_EVENTS_GET_SUCCESSFUL'
+    }))
+    .catch(error => {
+        console.log ('eventActions -> getCustomerRegisteredEvents data from error call : ', error);
+        if (error.response && error.response.data) {
+            return dispatch({
+                type: CUSTOMER_REGISTERED_EVENTS,
+                payload: error.response.data,
+                status: 'CUSTOMER_REGISTERED_EVENTS_GET_FAILED'
+            });
+        }
+    });
+}
+
+export const getCustomerEvents = (search, order) => dispatch => {
+    console.log("eventActions -> getCustomerEvents -> method entered");
+    axios.defaults.headers.common['authorization']= localStorage.getItem('token');
+    axios.get(`${backend}/events/customers?search=${search}&order=${order}`)
+    .then(response => dispatch({
+        type: CUSTOMER_EVENTS,
+        payload: response.data,
+        status: 'CUSTOMER_EVENTS_GET_SUCCESSFUL'
+    }))
+    .catch(error => {
+        console.log ('eventActions -> getCustomerRegisteredEvents data from error call : ', error);
+        if (error.response && error.response.data) {
+            return dispatch({
+                type: CUSTOMER_EVENTS,
+                payload: error.response.data,
+                status: 'CUSTOMER_EVENTS_GET_FAILED'
+            });
+        }
+    });
+}
 
 export const postRestaurantEvent = (data) => dispatch => {
     console.log("eventActions -> postRestaurantEvent -> method entered");

@@ -31,8 +31,7 @@ function handle_request(msg, callback) {
         });
       }
     });
-  }
-  if (msg.path === "rest_image") {
+  } else if (msg.path === "rest_image") {
     console.log('Inside Restaurant Image Upload POST method');
     Restaurant.findById(msg.restaurant_id, (err, restaurant) => {
       console.log(err,restaurant);
@@ -60,6 +59,9 @@ function handle_request(msg, callback) {
         });
       }
     });
+  } else if(msg.path === "dish_image") {
+    console.log('Inside Dish Image Upload POST method');
+    // path - /restaurants/:restaurant_id/dishes/:dish_id/dishImages
   }
 };
 

@@ -1,5 +1,7 @@
 // customer : search for event
 const Events = require('../models/event');
+const Customer = require('../models/cust_profile');
+const { search } = require('../../BackEnd/routes/events');
 
 function handle_request(msg, callback) {
     var res = {};
@@ -34,32 +36,59 @@ function handle_request(msg, callback) {
         });
     } else if (msg.path === 'restaurant_event_get') {
         console.log('Entered restaurant_event_get');
-        Events.find({ 'restaurant_id': msg.restaurant_id }, (err, events) => {
+        var query = Events.find({ 'restaurant_id': msg.restaurant_id });
+        query.populate("participants");
+        query.sort( { date : 1, time: 1 } )
+        query.exec((err, events) => {
             if (err) {
+                console.log(err);
                 res.status = 500;
                 res.message = 'SYSTEM_ERROR';
             } else {
                 res.status = 200;
                 if (events.length > 0) {
+                    events.map(event => { event.participants
+                        .map( participant => {
+                            console.log(participant.password);
+                            participant.password = undefined;
+                            participant.followers = undefined;
+                            return participant; 
+                        });
+                    });
                     res.message = JSON.stringify(events);
-                }
-                else {
+                } else {
                     res.message = 'NO_EVENTS';
                 }
             }
             callback(null, res);
-        }).sort( { date : 1, time: 1 } );
+        });
     } else if (msg.path === 'customer_event_get_asc') {
         console.log('Entered customer_event_get_asc');
+        var search = msg.search;
+        if (!search) {
+            search = "";
+        }
+        var searchresults = [];
         Events.find((err, events) => {
             if (err) {
                 res.status = 500;
                 res.message = 'SYSTEM_ERROR';
             } else {
+                if (msg.search === "") {
+                    console.log('Fetching all restaurants');
+                    searchresults = events;
+                } else {
+                    console.log('Filter upon the restaurants : ', events);
+                    events.map(event => {
+                        console.log(event.name);
+                        if (event.name.toLowerCase().includes(search.toLowerCase()) && !searchresults.includes(event))
+                            searchresults.push(event);
+                        });
+                }
                 res.status = 200;
-                if (events.length > 0) {
+                if (searchresults.length > 0) {
                     let restaurantEvents = [];
-                    events.map( event => {
+                    searchresults.map( event => {
                         const eventDetails = {
                             event_id: event._id,
                             name: event.name,
@@ -81,16 +110,33 @@ function handle_request(msg, callback) {
             callback(null, res);
         }).sort( { date : 1, time: 1 } );
     } else if (msg.path === 'customer_event_get_desc') {
+        var search = msg.search;
+        if (!search) {
+            search = "";
+        }
+        var searchresults = [];
         console.log('Entered customer_event_get_desc');
         Events.find((err, events) => {
             if (err) {
                 res.status = 500;
                 res.message = 'SYSTEM_ERROR';
             } else {
+                if (msg.search === "") {
+                    console.log('Fetching all restaurants');
+                    searchresults = events;
+                } else {
+                    console.log('Filter upon the restaurants : ', events);
+                    events.map(event => {
+                        console.log(event.name);
+                      if ((event.name.toLowerCase().includes(search.toLowerCase())) 
+                      && !searchresults.includes(event))
+                        searchresults.push(event);
+                    });
+                }
                 res.status = 200;
-                if (events.length > 0) {
+                if (searchresults.length > 0) {
                     let restaurantEvents = [];
-                    events.map( event => {
+                    searchresults.map( event => {
                         const eventDetails = {
                             event_id: event._id,
                             name: event.name,
@@ -132,8 +178,8 @@ function handle_request(msg, callback) {
                             hashtags: event.hashtags,
                         };
                         console.log('event.participants : ', event.participants);
-                        event.participants.map(participant => {
-                            if(participant.customer_id === msg.customer_id)
+                        event.participants.map(participant_id => {
+                            if(participant_id.equals(msg.customer_id))
                                 registeredEvents.push(eventDetails);
                         });
                     });
@@ -157,31 +203,16 @@ function handle_request(msg, callback) {
             }
             if (event) {
                 console.log('Found the event : ',event);
-                // map over and find participants
-                let address = (msg.city === null ? '' : msg.city) + ', ' + (msg.state === null ? '' : msg.state) + ', ' + (msg.country === null ? '' : msg.country);
-                let newParticipant = {
-                    customer_id: msg.customer_id,
-                    name: msg.name,
-                    profile_picture: msg.profile_picture,
-                    phone: msg.phone,
-                    dob: msg.dob,
-                    address: address,
-                    nick_name: msg.nick_name,
-                    about: msg.about,
-                    join_date: msg.join_date,
-                    favourite_restaurant: msg.favourite_restaurant,
-                    favourite_hobby: msg.favourite_hobby,
-                    blog_url: msg.blog_url,
-                    email_id: msg.email_id,
-                    };
+            
                 var already_registered_flag = false;
-                console.log('participant object created : ', newParticipant);
                 console.log('length : ', event.participants.length);
                 if(event.participants.length>0) {
                     console.log('Found the event participants: ',event.participants);
-                    event.participants.map(participant => {
-                        console.log('compare id : ', participant.customer_id === msg.customer_id);
-                        if (participant.customer_id === msg.customer_id) {
+                    event.participants.map(participant_id => {
+                        console.log('participant_id : ', participant_id);
+                        console.log('customer_id : ', msg.customer_id);
+                        console.log('compare id : ', participant_id.equals(msg.customer_id));
+                        if (participant_id.equals(msg.customer_id)) {
                             res.status = 200;
                             res.message = 'ALREADY_REGISTERED';
                             console.log('ALREADY_REGISTERED');
@@ -192,7 +223,7 @@ function handle_request(msg, callback) {
                 } 
                 if(!already_registered_flag){
                     console.log('Not ALREADY_REGISTERED');
-                    event.participants.push(newParticipant);
+                    event.participants.push(msg.customer_id);
                     event.save((err, registered) => {
                         console.log('error : ', err, 'results : ', registered);
                         if (err) {
@@ -218,4 +249,12 @@ function handle_request(msg, callback) {
     }
   };
   
+  async function getCustomers(participants) {
+    return new Promise((resolve, reject) => {
+        Customer.find({ '_id' : { '$in': participants}}, (err, customers) => {
+        if (err) reject(err)
+        resolve(customers);
+    });
+    });
+  }
   exports.handle_request = handle_request;
