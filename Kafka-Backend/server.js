@@ -8,6 +8,7 @@ var RestaurantProfile = require('./services/restaurantProfile');
 var ImageUpload = require('./services/uploads');
 var Restaurants = require('./services/restaurants');
 var Reviews = require('./services/reviews');
+var Events = require('./services/events');
 
 const { mongoDB } = require('./config/configuration');
 const mongoose = require('mongoose');
@@ -75,6 +76,7 @@ handleTopicRequest("restProfile", RestaurantProfile);
 handleTopicRequest("imageUpload", ImageUpload);
 handleTopicRequest("restaurants", Restaurants);
 handleTopicRequest("reviews", Reviews);
+handleTopicRequest("events", Events);
 
 /*
 
@@ -87,6 +89,7 @@ bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 -
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic imageUpload
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic restaurants
 bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic reviews
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic events
 
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic authentication
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic signup
@@ -97,5 +100,6 @@ bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic response_topic
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic imageUpload
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic restaurants
 bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic reviews
+bin/kafka-topics.sh --zookeeper localhost:2181 --delete --topic events
 
 */

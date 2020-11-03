@@ -16,8 +16,6 @@ class CustomersRestaurantView extends Component {
         super(props);
         this.setState({
             categories: ["Main Course", "Salads", "Appetizer", "Desserts", "Beverages"],
-            errorReviewFlag:false,
-            successReviewFlag:false,
         });
     }
 

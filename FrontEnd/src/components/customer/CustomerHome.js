@@ -115,7 +115,7 @@ class CustomerHome extends Component {
             resCard = null,
             pagesBar = null,
             active = 1,
-            itemsToShow = 4,
+            itemsToShow = 5,
             noRecordMessage = null;
 
         if (this.state && this.state.activePage) {
@@ -219,30 +219,7 @@ class CustomerHome extends Component {
                     />}
                 />
         }
-
-        // ---
-
-        // let restaurntsDisplay = null;
-        // if (this.state && this.state.restaurantsToDisplay) {
-        //     restaurntsDisplay = this.state.restaurantsToDisplay.map(restaurantToDisplay => {
-        //         return (
-        //             <CustomerRestaurantSearchCard key={restaurantToDisplay.id} restaurant={restaurantToDisplay}></CustomerRestaurantSearchCard>
-        //         )
-        //     })
-
-        // var locations=[];
-        // this.state.displayRestaurants.map(restaurantToDisplay => {
-        //     locations.push({
-        //         lat: parseFloat(restaurantToDisplay.map_location.split(",")[0]), 
-        //         lng: parseFloat(restaurantToDisplay.map_location.split(",")[1]), 
-        //     });
-        // })
-
-        // console.log("Google Maps Location Pins", locations)
-        // }
-
-        // ---
-
+        
         return (
             <div>
                 <center>

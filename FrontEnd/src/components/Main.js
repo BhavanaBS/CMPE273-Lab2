@@ -8,11 +8,13 @@ import customerSignup from './customer/CustomerSignup';
 import customerHome from './customer/CustomerHome';
 import customerProfile from './customer/CustomerProfile';
 import restaurantViewPage from './customer/CustomersRestaurantView';
+import customerEvents from './customer/CustomerEvents';
 
 import restaurantHome from './restaurant/RestaurantHome';
 import restaurantLogin from './restaurant/RestaurantLogin';
 import restaurantSignup from './restaurant/RestaurantSignup';
 import restaurantProfileUpdate from './restaurant/RestaurantProfileUpdate';
+import restaurantEvents from './restaurant/RestaurantEvents';
 import restaurantReviews from './restaurant/RestaurantReviewsView';
 
 //Create a Main Component
@@ -29,12 +31,14 @@ class Main extends Component {
                 <Route path="/customer/home" component={customerHome}/>
                 <Route path="/c_profile" component={customerProfile}/>
                 <Route path="/customer/restaurant/*" component={restaurantViewPage}/>
+                <Route path="/c_events" component={customerEvents}/>
 
                 <Route path="/r_login" component={restaurantLogin}/>
                 <Route path="/r_signup" component={restaurantSignup}/>
                 <Route path="/r_home" component={restaurantHome}/>
                 <Route path="/r_profile" component={restaurantProfileUpdate}/>
                 <Route path="/r_reviews" component={restaurantReviews}/>
+                <Route path="/r_events" component={restaurantEvents}/>
 
             </div>
         )
