@@ -38,12 +38,7 @@ class RestaurantEventsView extends Component {
             }
         }
     }
-
-    // eventsView = (inputEvent) => {
-    //     let returnEvent = <Event event={inputEvent}/>;
-    //     return returnEvent;
-    // };
-
+    
     changePage = (e) => {
         let page = this.state.activePage;
         if (e.target.text === ">" && page !== parseInt(e.target.name)) {

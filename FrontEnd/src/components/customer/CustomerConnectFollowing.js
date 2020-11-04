@@ -46,15 +46,15 @@ class CustomerConnectFollowing extends Component {
             eventRender = [];
 
         if (this.state && this.state.noRecord) {
-            message = <Alert variant="warning">Unable to Fetch Events. PLease retry in sometime</Alert>;
+            message = <Alert variant="warning">Unable to Fetch Yelpers. PLease retry in sometime.</Alert>;
         }
 
         if (this.state && !this.state.events) {
-            message = <Alert variant="warning">No Events</Alert>;
+            message = <Alert variant="warning">No Yelpers Registered on the website.</Alert>;
         }
 
         if (this.state && this.state.events && this.state.events.length === 0) {
-            message = <Alert variant="warning">No Registered Events</Alert>;
+            message = <Alert variant="warning">You have not followed anyone yet.</Alert>;
         }
         
         if (this.state && this.state.events && this.state.events.length > 0) {

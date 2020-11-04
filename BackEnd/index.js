@@ -11,6 +11,8 @@ const reviews = require('./routes/reviews');
 const events = require('./routes/events');
 const dishes = require('./routes/dishes');
 const orders = require('./routes/orders');
+const followConnection = require('./routes/customer/followConnection');
+const messages = require('./routes/messages');
 
 app.use('/signup', signup);
 app.use('/login', login);
@@ -23,6 +25,8 @@ app.use('/reviews', reviews);
 app.use('/events', events);
 app.use('/dishes', dishes);
 app.use('/orders', orders);
+app.use('/follow', followConnection);
+app.use('/messages', messages);
 
 const port = process.env.PORT || 3001;
 const server = app.listen(port, () => {

@@ -1,7 +1,7 @@
 // customer : search for event
 const Events = require('../models/event');
 const Customer = require('../models/cust_profile');
-const { search } = require('../../BackEnd/routes/events');
+// const { search } = require('../../BackEnd/routes/events');
 
 function handle_request(msg, callback) {
     var res = {};
@@ -51,7 +51,7 @@ function handle_request(msg, callback) {
                         .map( participant => {
                             console.log(participant.password);
                             participant.password = undefined;
-                            participant.followers = undefined;
+                            participant.following = undefined;
                             return participant; 
                         });
                     });
@@ -62,14 +62,19 @@ function handle_request(msg, callback) {
             }
             callback(null, res);
         });
-    } else if (msg.path === 'customer_event_get_asc') {
-        console.log('Entered customer_event_get_asc');
+    } else if (msg.path === 'customer_event_get') {
+        console.log('Entered customer_event_get');
         var search = msg.search;
         if (!search) {
             search = "";
         }
         var searchresults = [];
-        Events.find((err, events) => {
+        var query = Events.find();
+        if(msg.order === 'desc')
+            query.sort( { date : -1, time: -1 } )
+        else if(msg.order === 'asc')
+            query.sort( { date : 1, time: 1 } )
+        query.exec((err, events) => {
             if (err) {
                 res.status = 500;
                 res.message = 'SYSTEM_ERROR';
@@ -108,55 +113,7 @@ function handle_request(msg, callback) {
                 }
             }
             callback(null, res);
-        }).sort( { date : 1, time: 1 } );
-    } else if (msg.path === 'customer_event_get_desc') {
-        var search = msg.search;
-        if (!search) {
-            search = "";
-        }
-        var searchresults = [];
-        console.log('Entered customer_event_get_desc');
-        Events.find((err, events) => {
-            if (err) {
-                res.status = 500;
-                res.message = 'SYSTEM_ERROR';
-            } else {
-                if (msg.search === "") {
-                    console.log('Fetching all restaurants');
-                    searchresults = events;
-                } else {
-                    console.log('Filter upon the restaurants : ', events);
-                    events.map(event => {
-                        console.log(event.name);
-                      if ((event.name.toLowerCase().includes(search.toLowerCase())) 
-                      && !searchresults.includes(event))
-                        searchresults.push(event);
-                    });
-                }
-                res.status = 200;
-                if (searchresults.length > 0) {
-                    let restaurantEvents = [];
-                    searchresults.map( event => {
-                        const eventDetails = {
-                            event_id: event._id,
-                            name: event.name,
-                            description: event.description,
-                            time: event.time,
-                            date: event.date,
-                            location: event.location,
-                            hashtags: event.hashtags,
-                        };
-                        restaurantEvents.push(eventDetails);
-                    });
-                    res.message = JSON.stringify(restaurantEvents);
-                    console.log('restaurantEvents : ', restaurantEvents);
-                }
-                else {
-                    res.message = 'NO_EVENTS';
-                }
-            }
-            callback(null, res);
-        }).sort( { date : -1, time: -1 } );
+        })
     } else if (msg.path === 'customer_event_get_reg') {
         console.log('Entered customer_event_get_reg');
         Events.find((err, events) => {

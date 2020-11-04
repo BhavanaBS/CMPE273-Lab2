@@ -11,6 +11,8 @@ var Reviews = require('./services/reviews');
 var Events = require('./services/events');
 var Dishes = require('./services/dishes');
 var Orders = require('./services/orders');
+var FollowConnection = require('./services/followConnection');
+var Messages = require('./services/messages');
 
 const { mongoDB } = require('./config/configuration');
 const mongoose = require('mongoose');
@@ -81,8 +83,8 @@ handleTopicRequest("reviews", Reviews);
 handleTopicRequest("events", Events);
 handleTopicRequest("orders", Orders);
 handleTopicRequest("dishes", Dishes);
-// handleTopicRequest("messages", Events);
-// handleTopicRequest("follow", Events);
+handleTopicRequest("messages", Messages);
+handleTopicRequest("follow", FollowConnection);
 
 /*
 

@@ -2,11 +2,9 @@
 
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import axios from 'axios';
-import { Container, Alert, InputGroup, FormControl, Button } from "react-bootstrap";
+import { Container, Alert, InputGroup, FormControl, Button, Pagination } from "react-bootstrap";
 import Event from "./Event";
-import backend from '../common/serverDetails';
-import { getCustomerEvents, getCustomerRegisteredEvents } from '../../redux/action/eventActions'
+import { getCustomerEvents, getCustomerRegisteredEvents, registerToEvent } from '../../redux/action/eventActions'
 
 
 class CustomerEventsView extends Component {
@@ -21,7 +19,11 @@ class CustomerEventsView extends Component {
         this.onSearchSubmit = this.onSearchSubmit.bind(this);
         this.props.getCustomerEvents("", "asc");
         this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
+    }
 
+    componentDidMount() {
+        this.props.getCustomerEvents("", "asc");
+        this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
     }
 
     componentWillReceiveProps(nextProps) {
@@ -37,7 +39,6 @@ class CustomerEventsView extends Component {
                 console.log('CustomerEventsView -> componentWillReceiveProps -> events : ', events);
                 this.setState({
                     events: events,
-                    activePage: 1
                 });
             }
         }
@@ -60,31 +61,16 @@ class CustomerEventsView extends Component {
         });
     }
 
-    registerCustomer = (e) => {
-        let cust_id = localStorage.getItem("customer_id");
-        let event_id = e.target.name;
+    registerCustomer = (evant_id) => {
+        let customer_id = localStorage.getItem("customer_id");
         let data= {
-            event_id: event_id,
+            event_id: evant_id,
+            customer_id: customer_id,
         }
-        axios.defaults.withCredentials = true;
-        axios.post(`${backend}/customers/${cust_id}/events`, data)
-            .then(response => {
-                if (response.status === 200) {
-                    let registered_events = this.state.registered_events;
-                    registered_events.push(event_id)
-                    this.setState({
-                        registered_events: registered_events,
-                    });
-                }
-            })
-            .catch(err => {
-                if (err.response && err.response.data) {
-                    this.setState({
-                        errorFlag: true,
-                    });
-                }
-            });
-
+        console.log('______ Trying to register to : ', data);
+        this.props.registerToEvent(data);
+        this.props.getCustomerEvents("", "asc");
+        this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
     }
 
     eventsView = (inputEvent) => {
@@ -94,17 +80,17 @@ class CustomerEventsView extends Component {
             index = this.state.registered_events.findIndex(e => e.event_id === inputEvent.event_id)
         }
         console.log(index)
-        let returnEvent = <Event registerYourself={this.registerCustomer} event={inputEvent} showRegister={index >= 0}/>;
+        let returnEvent = <Event registerYourself={this.registerCustomer(inputEvent.event_id)} event={inputEvent} showRegister={index >= 0}/>;
         return returnEvent;
     };
-    
+
     render() {
         let message = null,
-        restEvent,
+            restEvent,
             eventRender = [];
 
         if (this.state && this.state.errorFlag) {
-            message = <Alert variant="warning">Unable to Fetch Events. PLease retry in sometime</Alert>;
+            message = <Alert variant="warning">Unable to Fetch Events. Please retry in sometime</Alert>;
         }
 
         if (this.state && !this.state.events) {
@@ -114,7 +100,7 @@ class CustomerEventsView extends Component {
         if (this.state && this.state.noRecord) {
             message = <Alert variant="warning">No Events for the search</Alert>;
         }
-        
+
         if (this.state && this.state.events && this.state.events.length > 0) {
             for (var i = 0; i < this.state.events.length; i++) {
                 restEvent = this.eventsView(this.state.events[i]);
@@ -146,7 +132,8 @@ class CustomerEventsView extends Component {
             {message}
 
             <br />
-            {eventRender}</center>
+            {eventRender}
+            </center>
         </Container>
         );
     }
@@ -160,7 +147,8 @@ const mapStateToProps = state => ({
 function mapDispatchToProps(dispatch) {
     return {
         getCustomerEvents: (search, order) => dispatch(getCustomerEvents(search, order)),
-        getCustomerRegisteredEvents: (customer_id) => dispatch(getCustomerRegisteredEvents(customer_id))
+        getCustomerRegisteredEvents: (customer_id) => dispatch(getCustomerRegisteredEvents(customer_id)),
+        registerToEvent:(data) => dispatch(registerToEvent(data)),
     };
 }
       

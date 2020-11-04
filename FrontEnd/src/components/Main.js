@@ -17,6 +17,7 @@ import restaurantSignup from './restaurant/RestaurantSignup';
 import restaurantProfileUpdate from './restaurant/RestaurantProfileUpdate';
 import restaurantEvents from './restaurant/RestaurantEvents';
 import restaurantReviews from './restaurant/RestaurantReviewsView';
+import restaurantMenu from './restaurant/RestaurantMenu';
 
 //Create a Main Component
 class Main extends Component {
@@ -41,6 +42,7 @@ class Main extends Component {
                 <Route path="/r_profile" component={restaurantProfileUpdate}/>
                 <Route path="/r_reviews" component={restaurantReviews}/>
                 <Route path="/r_events" component={restaurantEvents}/>
+                <Route path="/r_menu" component={restaurantMenu}/>
 
             </div>
         )

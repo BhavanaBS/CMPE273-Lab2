@@ -32,26 +32,10 @@ router.post('/restaurants', checkAuth, (req, res) => {
 
 router.get('/customers', checkAuth, (req, res) => {
   req.body.search = req.query.search;
-  if (req.query.order === 'asc') {
-    req.body.path = 'customer_event_get_asc';
-  } else {
-    req.body.path = 'customer_event_get_desc';
-  }
+  req.body.order = req.query.order;
+  req.body.path = 'customer_event_get';
   req.body.restaurant_id = req.params.restaurant_id;
   console.log('events.js -> customer_event_get_asc-> Authentication Completed');
-  kafka.make_request('events', req.body, (err, results) => {
-    if (err) {
-      res.status(500).end('System Error');
-    } else {
-      res.status(results.status).end(results.message);
-    }
-  });
-});
-
-router.get('/customers/desc', checkAuth, (req, res) => {
-  req.body.path = 'customer_event_get_desc';
-  req.body.searchInput = req.params.search_input.toLowerCase();
-  console.log('events.js -> customer_event_get_desc-> Authentication Completed');
   kafka.make_request('events', req.body, (err, results) => {
     if (err) {
       res.status(500).end('System Error');
@@ -86,16 +70,4 @@ router.post('/customers/register', checkAuth, (req, res) => {
   });
 });
 
-// router.get('/customers/search/:search_input', checkAuth, (req, res) => {
-//   req.body.path = 'customer_event_search';
-//   req.body.searchInput = req.params.search_input.toLowerCase();
-//   console.log('events.js -> customer_event_search-> Authentication Completed');
-//   kafka.make_request('events', req.body, (err, results) => {
-//     if (err) {
-//       res.status(500).end('System Error');
-//     } else {
-//       res.status(results.status).end(results.message);
-//     }
-//   });
-// });
 module.exports = router;

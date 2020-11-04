@@ -18,7 +18,7 @@ const custProfileSchema = new Schema({
   favourite_restaurant: { type: String, default: null },
   favourite_hobby: { type: String, default: null },
   blog_url: { type: String, default: null },
-  followers: [{ type: String }],
+  following: [{ type: Schema.ObjectId, ref: 'cust_profile' }],
 },
 {
   versionKey: false,

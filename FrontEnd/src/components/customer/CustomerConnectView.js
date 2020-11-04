@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 import { connect } from "react-redux";
 import axios from 'axios';
 import { Container, Alert, InputGroup, FormControl, Button, DropdownButton } from "react-bootstrap";
-import Event from "./Event";
+import CustomerConnect from "./CustomerConnect";
 import backend from '../common/serverDetails';
 import { getCustomerEvents, getCustomerRegisteredEvents } from '../../redux/action/eventActions'
 
@@ -100,7 +100,7 @@ class CustomerConnectView extends Component {
             index = this.state.registered_events.findIndex(e => e.event_id === inputEvent.event_id)
         }
         console.log(index)
-        let returnEvent = <Event registerYourself={this.registerCustomer} event={inputEvent} showRegister={index >= 0}/>;
+        let returnEvent = <CustomerConnect registerYourself={this.registerCustomer} event={inputEvent} showRegister={index >= 0}/>;
         return returnEvent;
     };
     
