@@ -8,7 +8,10 @@ const orderSchema = new Schema({
   status: { type: String, required: true },
   create_time: { type: Date, default: Date.now() },
   delivery_method: { type: String, required: true },
-  // order_dishes: [{ type: Schema.rest_dishes.ObjectId, ref: 'rest_profile'}],
+  order_dishes: [{
+  dish_id:{ type: Schema.ObjectId, ref: 'dish', required: true },
+  quantity: { type: Number, required: true },
+  }],
 },
 {
   versionKey: false,

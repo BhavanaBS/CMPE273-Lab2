@@ -8,7 +8,7 @@ class Event extends Component {
     if (this.props.showRegister) {
       showButton = <p style={{ margin:'1rem', color:'green'}} >Already Registered!</p>
     } else {
-      showButton = <Button style={{ margin:'1rem'}}  onClick={this.props.registerYourself} name={this.props.event.id}>Register</Button>
+      showButton = <Button style={{ margin:'1rem'}}  onClick={this.props.registerYourself} name={this.props.event.event_id}>Register</Button>
     }
     
     return (
@@ -25,7 +25,7 @@ class Event extends Component {
           
           <Col align="left">
               <br/><br/><br/>
-              <Card.Text>On: {this.props.event.date} Time: {this.props.event.time}</Card.Text>
+              <Card.Text>On: {this.props.event.date.slice(0,10)} Time: {this.props.event.time}</Card.Text>
               <Card.Text>At: {this.props.event.location}</Card.Text>
           </Col>
           <Col align="right">

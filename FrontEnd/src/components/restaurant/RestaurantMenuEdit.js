@@ -3,7 +3,6 @@
 // 5. View list of dishes added by them.
 
 import React, { Component } from 'react';
-import axios from 'axios';
 import { Carousel, Form, Col, Row, Button, Alert} from "react-bootstrap";
 import yelp_logo from "../../images/yelp.png";
 import backend from '../common/serverDetails';
@@ -16,7 +15,6 @@ class RestaurantMenuEdit extends Component {
             successFlag : false,
         });
         this.onSubmit = this.onSubmit.bind(this);
-        this.getDishImageIds(this.props.location.state.dish.id);
     }
 
     componentWillMount () {
@@ -48,52 +46,8 @@ class RestaurantMenuEdit extends Component {
             category: this.state.category,
         };
 
-        axios.defaults.withCredentials = true;
-        //make a post request with the user data
-        axios.put(`${backend}/restaurants/${localStorage.getItem("restaurant_id")}/dishes/${this.state.id}`, data)
-            .then(response => {
-                console.log("Dish update Status : ",response.status, "Response JSON : ",response.data);
-                if (response.status !== 200) {
-                    this.setState({
-                        errorFlag : true,
-                        successFlag : false,
-                    });
-                } else if (response.status === 200) {
-                    this.setState({
-                        errorFlag : false,
-                        successFlag : true,
-                    });
-                }
-            })
-            .catch((error) => {
-                console.log("Dish update failed!", error);
-                this.setState({
-                    errorFlag : true,
-                });
-            });
+        
     };
-
-    getDishImageIds = (dish_id) => {
-        console.log("Fetching the imageIds for dishId ", dish_id);
-
-        axios.get(`${backend}/dishes/${dish_id}/images`)
-            .then(response => {
-                console.log("Status Code : ",response.status, "Response JSON : ",response.data);
-                if (response.status === 200) {
-                    if (response.data) {
-                        this.setState({
-                            dishImageIds: response.data
-                        });
-                    }
-                    console.log("Fetching dish image ids success!", this.state);
-                } else {
-                    console.log("Fetching dish image ids failed!");
-                }
-            })
-            .catch((error) => {
-                console.log("Fetching dish image ids failed!", error);
-            });
-    }
 
     getImageCarouselItem = (imageId) => {
         let imageSrcUrl = `${backend}/dishes/${this.state.id}/images/${imageId}`;
@@ -124,24 +78,6 @@ class RestaurantMenuEdit extends Component {
                 "content-type": "multipart/form-data"
             }
         };
-        axios.post(`${backend}/dishes/${this.state.id}/images`, formData, headers)
-            .then(response => {
-                let dishImageIds= this.state.dishImageIds;
-                dishImageIds.push(response.data.image_id);
-                this.setState({
-                    successImageUpload: true,
-                    errorImageUpload: false,
-                    fileName: "Choose Image",
-                    user_image: response.data
-                });
-            })
-            .catch(err => {
-                this.setState({
-                    successImageUpload: false,
-                    errorImageUpload: true,
-                });
-                console.log("Error");
-            });
     }
 
     render() {

@@ -5,8 +5,8 @@ const initialState = {
     status: null,
 };
 
-const reviewRestaurant = (state = initialState, action) => {
-    console.log('reviewRestaurant.js -> action.payload : ', action.payload);
+const reviewReducer = (state = initialState, action) => {
+    console.log('reviewReducer.js -> action.payload : ', action.payload);
     switch (action.type) {
         case RESTAURANT_REVIEW_GET: 
         case RESTAURANT_REVIEW_POST: 
@@ -18,6 +18,6 @@ const reviewRestaurant = (state = initialState, action) => {
         default:
             return state;
     }
-  };
+};
 
-export default reviewRestaurant;
+export default reviewReducer;

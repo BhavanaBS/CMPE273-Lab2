@@ -24,4 +24,4 @@ import { CUSTOMER_LOGIN, RESTAURANT_LOGIN, LOGOUT } from "../action/actions";
         default:
             return state;
     }
- };
+};

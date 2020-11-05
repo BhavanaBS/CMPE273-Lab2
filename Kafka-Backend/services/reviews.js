@@ -20,7 +20,6 @@ function handle_request(msg, callback) {
                 rating: msg.rating,
                 review: msg.review,
                 create_time: new Date(Date.now()),
-                // create_time: new Date(Date.now()).toLocaleDateString("en-US", {year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }),
               };
             restaurant.reviews.push(newReview);
             restaurant.save((err, saveReview) => {

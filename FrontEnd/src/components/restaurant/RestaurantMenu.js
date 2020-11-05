@@ -5,7 +5,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router';
 import { NavLink, BrowserRouter as Router, Route } from 'react-router-dom';
-import { Nav, Button } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import RestaurantMenuView from "../restaurant/RestaurantMenuView";
 import RestaurantMenuAdd from "../restaurant/RestaurantMenuAdd";
 import RestaurantMenuEdit from '../restaurant/RestaurantMenuEdit';

@@ -1,33 +1,46 @@
-// View list of users using yelp
-// Search for user(using user’s first name or nickname)
-// Filter the results based on their Location
-// Click on user’s Name to view user’s profile
-// Follow any user by clicking follow button in their profile
-// Filter users based on following
-// Pagination should be implemented
+// View list of upcoming events in the order of increasing date
 
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import axios from 'axios';
 import { Container, Alert, InputGroup, FormControl, Button, DropdownButton } from "react-bootstrap";
 import CustomerConnect from "./CustomerConnect";
-import backend from '../common/serverDetails';
-import { getCustomerEvents, getCustomerRegisteredEvents } from '../../redux/action/eventActions'
+import { getCustomers, followCustomer, getCustomersFollowing} from '../../redux/action/followActions'
 
 
-class CustomerConnectView extends Component {
+class CustomerEventsView extends Component {
+    
+
     constructor(props) {
         super(props);
         this.setState({
-            search_variable: "",
-            order: 'asc',
             errorFlag: false,
+            search_input: '',
+            order: 'asc',
         });
         this.onChange = this.onChange.bind(this);
         this.onSearchSubmit = this.onSearchSubmit.bind(this);
-        this.props.getCustomerEvents("", "asc");
-        this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
+        this.props.getCustomers("", "asc");
+        this.props.getCustomersFollowing(localStorage.getItem('customer_id'));
+    }
 
+    componentDidUpdate() {
+        if (this.state && this.state.customerRegisterToEvent && this.state.customerRegisterToEvent === 'REGISTERED_EVENT') {
+            this.setState({
+                customerRegisterToEvent: null,
+            })
+        }
+    }
+
+    componentDidMount() {
+        this.setState({
+            errorFlag: false,
+            search_input: '',
+            order: 'asc',
+        });
+        if (!this.state || !(this.state.events && this.state.noRecord)) {
+            this.props.getCustomers("", "asc");
+            this.props.getCustomersFollowing(localStorage.getItem('customer_id'));
+        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -36,14 +49,14 @@ class CustomerConnectView extends Component {
 
             if(events.noRecord){
                 this.setState({
-                    noRecord: events,
+                    noRecord: events.noRecord,
                     events: [],
                 });
             } else {
                 console.log('CustomerEventsView -> componentWillReceiveProps -> events : ', events);
                 this.setState({
                     events: events,
-                    activePage: 1
+                    noRecord: false,
                 });
             }
         }
@@ -54,10 +67,19 @@ class CustomerConnectView extends Component {
                 registered_events: registered_events,
             });
         }
+
+        if (nextProps.customerRegisterToEvent) {
+            var { customerRegisterToEvent } = nextProps;
+            this.setState({
+                customerRegisterToEvent: customerRegisterToEvent
+            });
+            this.props.getCustomersFollowing(localStorage.getItem('customer_id'));
+        }
     }
 
     onSearchSubmit = (e) => {
-        this.props.getCustomerEvents(this.state.search_variable, this.state.order);
+        e.preventDefault();
+        this.props.getCustomers(this.state.search_input, this.state.order);
     }
 
     onChange = (e) => {
@@ -67,35 +89,24 @@ class CustomerConnectView extends Component {
     }
 
     registerCustomer = (e) => {
-        let cust_id = localStorage.getItem("customer_id");
-        let event_id = e.target.name;
+        console.log("Event:", e);
+        let customer_id = localStorage.getItem("customer_id");
         let data= {
-            event_id: event_id,
+            event_id: e.target.name,
+            customer_id: customer_id,
         }
-        axios.defaults.withCredentials = true;
-        axios.post(`${backend}/customers/${cust_id}/events`, data)
-            .then(response => {
-                if (response.status === 200) {
-                    let registered_events = this.state.registered_events;
-                    registered_events.push(event_id)
-                    this.setState({
-                        registered_events: registered_events,
-                    });
-                }
-            })
-            .catch(err => {
-                if (err.response && err.response.data) {
-                    this.setState({
-                        errorFlag: true,
-                    });
-                }
-            });
-
+        console.log('______ Trying to register to : ', data);
+        this.props.followCustomer(data);
+        this.props.getCustomers(this.state.search_input, this.state.order);
+        this.props.getCustomersFollowing(localStorage.getItem('customer_id'));
     }
 
     eventsView = (inputEvent) => {
-        let index = 0;
-        if (this.state.registered_events && this.state.registered_events[0]) {
+        let index = -1;
+        if (this.state.registered_events && this.state.registered_events === 'NO_EVENTS_REGISTERED') {
+            console.log("No registered events, so no need to find index!");
+        }
+        else if (this.state.registered_events && this.state.registered_events[0]) {
             console.log("INDEX")
             index = this.state.registered_events.findIndex(e => e.event_id === inputEvent.event_id)
         }
@@ -103,25 +114,25 @@ class CustomerConnectView extends Component {
         let returnEvent = <CustomerConnect registerYourself={this.registerCustomer} event={inputEvent} showRegister={index >= 0}/>;
         return returnEvent;
     };
-    
+
     render() {
         let message = null,
             restEvent,
             eventRender = [],
-            locationDropdown = [];
+            locationDropdown = null;
 
         if (this.state && this.state.errorFlag) {
-            message = <Alert variant="warning">Unable to Fetch Events. PLease retry in sometime</Alert>;
+            message = <Alert variant="warning">Unable to Fetch Events. Please retry in sometime</Alert>;
         }
 
         if (this.state && !this.state.events) {
-            message = <Alert variant="warning">No Yelpers Registered.</Alert>;
+            message = <Alert variant="warning">No Events</Alert>;
         }
 
         if (this.state && this.state.noRecord) {
-            message = <Alert variant="warning">No Yelpers for the search</Alert>;
+            message = <Alert variant="warning">No Events for the search</Alert>;
         }
-        
+
         if (this.state && this.state.events && this.state.events.length > 0) {
             for (var i = 0; i < this.state.events.length; i++) {
                 restEvent = this.eventsView(this.state.events[i]);
@@ -131,15 +142,15 @@ class CustomerConnectView extends Component {
 
         return (
             <Container className="justify-content">
-            <br/>
+            <br />
             <center>
-            <h3>Connect To Yelpers</h3>
-            <br/>
+            <h3>Events</h3>
+            <br />
             
             <form onSubmit={this.onSearchSubmit}>
                 <InputGroup style={{ width: '50%' }} size="lg">
                     <FormControl
-                        placeholder="Search Yelper By Name"
+                        placeholder="Search Event By Name"
                         aria-label="Search Events"
                         aria-describedby="basic-addon2"
                         name="search_input"
@@ -148,20 +159,21 @@ class CustomerConnectView extends Component {
                     <InputGroup.Append>
                         <Button variant="primary" type="submit">Search</Button>
                     </InputGroup.Append>
+                
                     <DropdownButton
-                            as={InputGroup.Append}
-                            variant="outline-secondary"
-                            title="Location"
-                            id="input-group-dropdown-2"
-                        >
-                        {locationDropdown}
+                        as={InputGroup.Append}
+                        variant="outline-secondary"
+                        title="Location"
+                        id="input-group-dropdown-2"
+                    >
+                    {locationDropdown}
                     </DropdownButton>
-                    </InputGroup>
-                </form>
+                </InputGroup>
+            </form>
             {message}
-
             <br />
-            {eventRender}</center>
+            {eventRender}
+            </center>
         </Container>
         );
     }
@@ -170,13 +182,15 @@ class CustomerConnectView extends Component {
 const mapStateToProps = state => ({
     events: state.eventState.customerEvents,
     registered_events: state.eventState.customerRegisteredEvents,
+    customerRegisterToEvent: state.eventState.customerRegisterToEvent, 
 });
 
 function mapDispatchToProps(dispatch) {
     return {
-        getCustomerEvents: (search, order) => dispatch(getCustomerEvents(search, order)),
-        getCustomerRegisteredEvents: (customer_id) => dispatch(getCustomerRegisteredEvents(customer_id))
+        getCustomers: (search, order) => dispatch(getCustomers(search, order)),
+        getCustomersFollowing: (customer_id) => dispatch(getCustomersFollowing(customer_id)),
+        followCustomer:(data) => dispatch(followCustomer(data)),
     };
 }
       
-export default connect(mapStateToProps, mapDispatchToProps)(CustomerConnectView);
+export default connect(mapStateToProps, mapDispatchToProps)(CustomerEventsView);

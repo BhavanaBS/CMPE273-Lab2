@@ -3,9 +3,9 @@
 // 5. View list of dishes added by them.
 
 import React, { Component } from 'react';
-import axios from 'axios';
-import { Form, Col, Row, Button, Carousel } from "react-bootstrap";
-import backend from '../common/serverDetails';
+import { Form, Col, Row, Button, Alert } from "react-bootstrap";
+import { postDish } from "../../redux/action/menuActions";
+import { connect } from "react-redux";
 
 class RestaurantMenuAdd extends Component {
     constructor(props) {
@@ -17,6 +17,10 @@ class RestaurantMenuAdd extends Component {
         this.onSubmit = this.onSubmit.bind(this);
     }
 
+    componentWillMount () {
+        this.setState({});
+    }
+
     onChange = e => {
         this.setState({
             [e.target.name]: e.target.value
@@ -26,59 +30,26 @@ class RestaurantMenuAdd extends Component {
     onSubmit = e => {
         e.preventDefault();
         const data = {
-            rest_id: localStorage.getItem("restaurant_id"),
             name: this.state.name,
             ingredients: this.state.ingredients,
             description: this.state.description,
             price: this.state.price,
             category: this.state.category,
         };
-
-        axios.defaults.withCredentials = true;
-        //make a post request with the user data
-        axios.post(`${backend}/restaurants/${localStorage.getItem("restaurant_id")}/dishes`, data)
-            .then(response => {
-                console.log("Dish Creation Status : ",response.status, "Response JSON : ",response.data);
-                if (response.status !== 200) {
-                    this.setState({
-                        errorFlag : true,
-                        successFlag : false,
-                    });
-                } else if (response.status === 200) {
-                    this.setState({
-                        errorFlag : false,
-                        successFlag : true,
-                    });
-                }
-            })
-            .catch((error) => {
-                console.log("Customer Signup Failed!", error);
-                this.setState({
-                    errorFlag : true,
-                });
-            });
+        this.props.postDish(data);
     };
 
-    
-
     render() {
-        var errorMessage = null;
-        if(this.state && this.state.errorFlag) {
-            errorMessage = (
-                <div>
-                    <p style={{ color: "red" }}>Dish Creation Failed!</p>
-                </div>
-            )
-        } else if(this.state && this.state.successFlag) {
-                errorMessage = (
-                    <div>
-                        <p style={{ color: "green" }}>Dish Created!</p>
-                    </div>
-                )
-        }
+        let  dishAddStatus = null;
+        if(this.props.status && this.props.status === 'RESTAURANT_MENU_DISH_POST_SUCCESSFUL')
+            dishAddStatus = <Alert variant="success">Dish Created Successfully!</Alert>;
+        if(this.props.status && this.props.status === 'RESTAURANT_MENU_DISH_POST_FAILED')
+            dishAddStatus = <Alert variant="warning">Dish Creation Failed!</Alert>;
+        
         return(
             <div>
             <center> <h3>Add A Dish</h3><br /></center> 
+            {dishAddStatus}
                 <Row>
                     <Col>                       
                         <Form onSubmit={this.onSubmit}>
@@ -127,7 +98,6 @@ class RestaurantMenuAdd extends Component {
                             <br/><br/>
                             <Button style={{marginLeft:"23rem"}} variant="danger" href="/r_menu/view">Cancel</Button>  {''}
                             <Button type="sumbit">Add Item</Button>                            <br/>
-                            {errorMessage}
                             <br/><br/>
                         </Form>
                     </Col>
@@ -137,4 +107,15 @@ class RestaurantMenuAdd extends Component {
     }
 }
 
-export default RestaurantMenuAdd;
+const mapStateToProps = state => ({
+    eventsAdd: state.menuState.postDish,
+    status: state.menuState.status,
+});
+
+function mapDispatchToProps(dispatch) {
+    return {
+        postDish: data => dispatch(postDish(data)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(RestaurantMenuAdd);

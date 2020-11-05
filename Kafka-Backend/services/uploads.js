@@ -70,43 +70,41 @@ function handle_request(msg, callback) {
         callback(null, res);
       }
       if (restaurant) {
-        if(restaurant.rest_dishes.length > 0) {
-          var index = -1;
-          if(restaurant.rest_dishes.length > 0) { 
-            index = restaurant.rest_dishes.map(dish => dish._id).indexOf(msg.dish_id);
-          }
-          console.log('Request image upload of Dish id : ', msg.dish_id);
-          console.log('Uploading to index :', index);
-          if (index > -1) {
-            restaurant.rest_dishes[index].dish_image.push(msg.filename);
-            restaurant.save((err, imageUploaded) => {
-              console.log('error : ', err, 'results : ', imageUploaded);
-              if (err) {
-                res.status = 500;
-                res.message = 'UPLOAD_IMAGE_ERROR';
-                console.log('UPLOAD_IMAGE_ERROR for Dish')
-              } else if (imageUploaded) {
-                dishRemovedFlag = true;
-                res.status = 200;
-                res.message = 'DISH_IMAGE_UPLOADED';
-                console.log('DISH_IMAGE_UPLOADED for Dish')
-              } else {
-                console.log('Nothing happened during this call.')
-              }
-              callback(null, res);
-            });
-          } else {
-            res.status = 404;
-            res.message = 'DISH_INVALID';
-            console.log('DISH_INVALID for DishImage');
+        var index = -1;
+        if(restaurant.rest_dishes.length > 0) { 
+          index = restaurant.rest_dishes.map(dish => dish._id).indexOf(msg.dish_id);
+        }
+        console.log('Request image upload of Dish id : ', msg.dish_id);
+        console.log('Uploading to index :', index);
+        if (index > -1) {
+          restaurant.rest_dishes[index].dish_image.push(msg.filename);
+          restaurant.save((err, imageUploaded) => {
+            console.log('error : ', err, 'results : ', imageUploaded);
+            if (err) {
+              res.status = 500;
+              res.message = 'UPLOAD_IMAGE_ERROR';
+              console.log('UPLOAD_IMAGE_ERROR for Dish')
+            } else if (imageUploaded) {
+              dishRemovedFlag = true;
+              res.status = 200;
+              res.message = 'DISH_IMAGE_UPLOADED';
+              console.log('DISH_IMAGE_UPLOADED for Dish')
+            } else {
+              console.log('Nothing happened during this call.')
+            }
             callback(null, res);
-          }
+          });
         } else {
           res.status = 404;
           res.message = 'DISH_INVALID';
           console.log('DISH_INVALID for DishImage');
           callback(null, res);
         }
+      } else if (!restaurant) {
+        res.status = 404;
+        res.message = 'RESTAURANT_INVALID';
+        console.log('RESTAURANT_INVALID for DishImage');
+        callback(null, res);
       }
     });
   }

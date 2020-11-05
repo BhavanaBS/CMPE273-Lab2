@@ -6,10 +6,13 @@ const initialState = {
     restaurantEvents: {},
     customerRegisteredEvents: {},
     status: null,
+    // regestiredEventGetStatus: null,
+    // registerEventStatus: null,
+    // getEventsStatus: null,
 };
 
-const reviewRestaurant = (state = initialState, action) => {
-    console.log('reviewRestaurant.js -> action.payload : ', action.payload);
+const eventReducer = (state = initialState, action) => {
+    console.log('eventReducer.js -> action.payload : ', action.payload);
     switch (action.type) {
         case RESTAURANT_EVENTS_GET: 
             return {
@@ -23,19 +26,22 @@ const reviewRestaurant = (state = initialState, action) => {
                 ...state,
                 restaurantEventAdd: action.payload,
                 status: action.status,
+                customerRegisterToEvent: null
             };
         case CUSTOMER_EVENTS:  
             return {
                 ...state,
                 customerEvents: action.payload,
-                status: action.status,
+                // getEventsStatus: action.getEventsStatus,
+                customerRegisterToEvent: null
             };
         case CUSTOMER_REGISTERED_EVENTS: 
             return {
                 ...state,
                 customerRegisteredEvents: action.payload,
-                status: action.status,
-            }; 
+                // regestiredEventGetStatus: action.regestiredEventGetStatus,
+                customerRegisterToEvent: null
+            };
         case CUSTOMER_REGISTER_TO_EVENT: 
             return {
                 ...state,
@@ -45,6 +51,6 @@ const reviewRestaurant = (state = initialState, action) => {
         default:
             return state;
     }
-  };
+};
 
-export default reviewRestaurant;
+export default eventReducer;

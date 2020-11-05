@@ -53,11 +53,9 @@ class CustomerEventsRegistered extends Component {
             message = <Alert variant="warning">No Events</Alert>;
         }
 
-        if (this.state && this.state.events && this.state.events.length === 0) {
+        if (this.state && this.state.events && this.state.events === 'NO_EVENTS_REGISTERED') {
             message = <Alert variant="warning">No Registered Events</Alert>;
-        }
-        
-        if (this.state && this.state.events && this.state.events.length > 0) {
+        } else if (this.state && this.state.events && this.state.events.length > 0) {
             for (var i = 0; i < this.state.events.length; i++) {
                 restEvent = this.eventsView(this.state.events[i]);
                 eventRender.push(restEvent);

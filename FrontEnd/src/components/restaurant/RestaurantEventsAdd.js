@@ -1,10 +1,9 @@
 // 1. Post events(event name, description, time, date, location, hashtags)
 
 import React, { Component } from 'react';
-import { Form, Col, Row, Button} from "react-bootstrap";
+import { Form, Col, Row, Button, Alert} from "react-bootstrap";
 import { connect } from "react-redux";
 import { postRestaurantEvent } from "../../redux/action/eventActions";
-import PropTypes from 'prop-types';
 
 class RestaurantEventsAdd extends Component {
     constructor(props) {
@@ -13,13 +12,8 @@ class RestaurantEventsAdd extends Component {
     }
 
     componentWillMount () {
-        this.setState({
-            events: {
-            },
-        });
+        this.setState({});
     }
-
-    component
 
     onChange = e => {
         this.setState({
@@ -44,22 +38,11 @@ class RestaurantEventsAdd extends Component {
     
     render() {
         let  eventCreationStatus = null;
-        if(this.props.status && this.props.status === 'RESTAURANT_EVENT_POST_SUCCESSFUL') {
-            eventCreationStatus = <div style={{marginLeft:'5rem'}}>
-            <br/>
-            <p style={{color:"green"}}>
-            Event Created Successfully!
-            </p>
-            </div>
-        }
-        if(this.props.status && this.props.status === 'RESTAURANT_EVENT_POST_FAILED') {
-            eventCreationStatus = <div style={{marginLeft:'5rem'}}>
-            <br/>
-            <p style={{color:"red"}}>
-            Review Submit Failed!
-            </p>
-            </div>
-        }
+        if(this.props.status && this.props.status === 'RESTAURANT_EVENT_POST_SUCCESSFUL')
+            eventCreationStatus = <Alert variant="success"> Event Created Successfully! </Alert>
+            
+        if(this.props.status && this.props.status === 'RESTAURANT_EVENT_POST_FAILED')
+            eventCreationStatus = <Alert variant="warning"> Event Creation Failed! </Alert>
 
         return (
             <div>
@@ -160,10 +143,6 @@ class RestaurantEventsAdd extends Component {
         );
     }
 }
-
-RestaurantEventsAdd.propTypes = {
-    events: PropTypes.object.isRequired
-};
 
 const mapStateToProps = state => ({
     eventsAdd: state.eventState.restaurantEventsAdd,

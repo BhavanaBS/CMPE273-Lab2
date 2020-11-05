@@ -210,8 +210,8 @@ class CustomersRestaurantView extends Component {
         }
 
         if (this.state && this.state.categories) {
-            for (var i = 0; i < this.state.categories.length; i++) {
-                category = this.dishesView(this.state.categories[i]);
+            for (var j = 0; j < this.state.categories.length; j++) {
+                category = this.dishesView(this.state.categories[j]);
                 menuRender.push(category);
             }
         }

@@ -96,7 +96,40 @@ function handle_request(msg, callback) {
         res.message = 'SYSTEM_ERROR';
         callback(null, res);
       } else if( restaurant ) {
-        
+        var index = -1;
+        if(restaurant.rest_dishes.length > 0) { 
+          index = restaurant.rest_dishes.map(dish => dish._id).indexOf(msg.dish_id);
+        }
+        console.log('Request edit of Dish id : ', msg.dish_id);
+        console.log('Removing index :', index);
+        if (index > -1) {
+          restaurant.rest_dishes[index].name = msg.name;
+          restaurant.rest_dishes[index].ingredients = msg.ingredients;
+          restaurant.rest_dishes[index].price = msg.price;
+          restaurant.rest_dishes[index].category = msg.category;
+          restaurant.rest_dishes[index].description = msg.description;
+          restaurant.save((err, editDish) => {
+            console.log('error : ', err, 'results : ', editDish);
+            if (err) {
+              res.status = 500;
+              res.message = 'EDIT_DISH_ERROR';
+              console.log('EDIT_DISH_ERROR for Restaurant')
+            } else if (editDish) {
+              dishRemovedFlag = true;
+              res.status = 200;
+              res.message = 'DISH_EDITED';
+              console.log('DISH_EDITED for Restaurant')
+            } else {
+              console.log('Nothing happened during this call.')
+            }
+            callback(null, res);
+          });
+        } else {
+          res.status = 404;
+          res.message = 'DISH_INVALID';
+          console.log('DISH_INVALID for Restaurant')
+          callback(null, res);
+        } 
       } else {
         res.status = 404;
         res.message = 'RESTAURANT_INVALID';

@@ -2,28 +2,46 @@
 
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { Container, Alert, InputGroup, FormControl, Button, Pagination } from "react-bootstrap";
+import { Container, Alert, InputGroup, FormControl, Button, Form, Row, Col } from "react-bootstrap";
 import Event from "./Event";
 import { getCustomerEvents, getCustomerRegisteredEvents, registerToEvent } from '../../redux/action/eventActions'
 
 
 class CustomerEventsView extends Component {
+    
+
     constructor(props) {
         super(props);
         this.setState({
-            search_variable: "",
-            order: 'asc',
             errorFlag: false,
+            search_input: '',
+            order: 'asc',
         });
         this.onChange = this.onChange.bind(this);
+        this.onChangeOrder = this.onChangeOrder.bind(this);
         this.onSearchSubmit = this.onSearchSubmit.bind(this);
         this.props.getCustomerEvents("", "asc");
         this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
     }
 
+    componentDidUpdate() {
+        if (this.state && this.state.customerRegisterToEvent && this.state.customerRegisterToEvent === 'REGISTERED_EVENT') {
+            this.setState({
+                customerRegisterToEvent: null,
+            })
+        }
+    }
+
     componentDidMount() {
-        this.props.getCustomerEvents("", "asc");
-        this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
+        this.setState({
+            errorFlag: false,
+            search_input: '',
+            order: 'asc',
+        });
+        if (!this.state || !(this.state.events && this.state.noRecord)) {
+            this.props.getCustomerEvents("", "asc");
+            this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
+        }
     }
 
     componentWillReceiveProps(nextProps) {
@@ -32,13 +50,18 @@ class CustomerEventsView extends Component {
 
             if(events.noRecord){
                 this.setState({
-                    noRecord: events,
+                    noRecord: events.noRecord,
                     events: [],
+                    // search_input: '',
+                    // order: 'asc',
                 });
             } else {
                 console.log('CustomerEventsView -> componentWillReceiveProps -> events : ', events);
                 this.setState({
                     events: events,
+                    noRecord: false,
+                    // search_input: '',
+                    // order: 'asc',
                 });
             }
         }
@@ -49,10 +72,19 @@ class CustomerEventsView extends Component {
                 registered_events: registered_events,
             });
         }
+
+        if (nextProps.customerRegisterToEvent) {
+            var { customerRegisterToEvent } = nextProps;
+            this.setState({
+                customerRegisterToEvent: customerRegisterToEvent
+            });
+            this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
+        }
     }
 
     onSearchSubmit = (e) => {
-        this.props.getCustomerEvents(this.state.search_variable, this.state.order);
+        e.preventDefault();
+        this.props.getCustomerEvents(this.state.search_input, this.state.order);
     }
 
     onChange = (e) => {
@@ -61,26 +93,38 @@ class CustomerEventsView extends Component {
         });
     }
 
-    registerCustomer = (evant_id) => {
+    onChangeOrder = (e) => {
+        this.setState({
+            [e.target.name]: e.target.value,
+        });
+        e.preventDefault();
+        this.props.getCustomerEvents(this.state.search_input, e.target.value);
+    }
+
+    registerCustomer = (e) => {
+        console.log("Event:", e);
         let customer_id = localStorage.getItem("customer_id");
         let data= {
-            event_id: evant_id,
+            event_id: e.target.name,
             customer_id: customer_id,
         }
         console.log('______ Trying to register to : ', data);
         this.props.registerToEvent(data);
-        this.props.getCustomerEvents("", "asc");
+        this.props.getCustomerEvents(this.state.search_input, this.state.order);
         this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
     }
 
     eventsView = (inputEvent) => {
-        let index = 0;
-        if (this.state.registered_events && this.state.registered_events[0]) {
+        let index = -1;
+        if (this.state.registered_events && this.state.registered_events === 'NO_EVENTS_REGISTERED') {
+            console.log("No registered events, so no need to find index!");
+        }
+        else if (this.state.registered_events && this.state.registered_events[0]) {
             console.log("INDEX")
             index = this.state.registered_events.findIndex(e => e.event_id === inputEvent.event_id)
         }
         console.log(index)
-        let returnEvent = <Event registerYourself={this.registerCustomer(inputEvent.event_id)} event={inputEvent} showRegister={index >= 0}/>;
+        let returnEvent = <Event registerYourself={this.registerCustomer} event={inputEvent} showRegister={index >= 0}/>;
         return returnEvent;
     };
 
@@ -127,10 +171,19 @@ class CustomerEventsView extends Component {
                     <InputGroup.Append>
                         <Button variant="primary" type="submit">Search</Button>
                     </InputGroup.Append>
-                    </InputGroup>
-                </form>
+                </InputGroup>
+                <br/>
+                    <Form.Group as={Row} controlId="order"  style={{marginLeft:'30%'}}>
+                        <Form.Label column sm="1">Order:</Form.Label>
+                        <Col sm="4">
+                            <Form.Control as="select" onChange={this.onChangeOrder} name="order" required>
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </Form.Control>
+                        </Col>
+                    </Form.Group>
+            </form>
             {message}
-
             <br />
             {eventRender}
             </center>
@@ -142,6 +195,7 @@ class CustomerEventsView extends Component {
 const mapStateToProps = state => ({
     events: state.eventState.customerEvents,
     registered_events: state.eventState.customerRegisteredEvents,
+    customerRegisterToEvent: state.eventState.customerRegisterToEvent, 
 });
 
 function mapDispatchToProps(dispatch) {

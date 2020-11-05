@@ -4,6 +4,40 @@ import { RESTAURANT_EVENTS_GET, RESTAURANT_EVENT_POST,
     } from '../action/actions';
 import backend from '../../components/common/serverDetails';
 
+export const getCustomerEvents = (search, order) => dispatch => {
+    console.log("eventActions -> getCustomerEvents -> method entered");
+    axios.defaults.headers.common['authorization']= localStorage.getItem('token');
+    axios.get(`${backend}/events/customers?search=${search}&order=${order}`)
+    .then(response => {
+        if (response.data) {
+            if (response.data === 'NO_EVENTS') {
+                console.log('eventActions -> getCustomerEvents -> no records entered : ', response.data);
+                return {
+                    noRecord: true
+                };
+            } else {
+                console.log('eventActions -> getCustomerEvents -> setting data : ', response.data);
+                return response.data;
+            }
+        } 
+    })
+    .then(response => dispatch({
+        type: CUSTOMER_EVENTS,
+        payload: response,
+        status: 'CUSTOMER_EVENTS_GET_SUCCESSFUL'
+    }))
+    .catch(error => {
+        console.log ('eventActions -> getCustomerEvents data from error call : ', error);
+        if (error.response && error.response.data) {
+            return dispatch({
+                type: CUSTOMER_EVENTS,
+                payload: error.response.data,
+                getEventsStatus: 'CUSTOMER_EVENTS_GET_FAILED'
+            });
+        }
+    });
+}
+
 export const getCustomerRegisteredEvents = (customer_id) => dispatch => {
     console.log("eventActions -> getCustomerRegisteredEvents -> method entered");
     axios.defaults.headers.common['authorization']= localStorage.getItem('token');
@@ -11,7 +45,7 @@ export const getCustomerRegisteredEvents = (customer_id) => dispatch => {
     .then(response => dispatch({
         type: CUSTOMER_REGISTERED_EVENTS,
         payload: response.data,
-        status: 'CUSTOMER_REGISTERED_EVENTS_GET_SUCCESSFUL'
+        regestiredEventGetStatus: 'CUSTOMER_REGISTERED_EVENTS_GET_SUCCESSFUL'
     }))
     .catch(error => {
         console.log ('eventActions -> getCustomerRegisteredEvents data from error call : ', error);
@@ -19,28 +53,7 @@ export const getCustomerRegisteredEvents = (customer_id) => dispatch => {
             return dispatch({
                 type: CUSTOMER_REGISTERED_EVENTS,
                 payload: error.response.data,
-                status: 'CUSTOMER_REGISTERED_EVENTS_GET_FAILED'
-            });
-        }
-    });
-}
-
-export const getCustomerEvents = (search, order) => dispatch => {
-    console.log("eventActions -> getCustomerEvents -> method entered");
-    axios.defaults.headers.common['authorization']= localStorage.getItem('token');
-    axios.get(`${backend}/events/customers?search=${search}&order=${order}`)
-    .then(response => dispatch({
-        type: CUSTOMER_EVENTS,
-        payload: response.data,
-        status: 'CUSTOMER_EVENTS_GET_SUCCESSFUL'
-    }))
-    .catch(error => {
-        console.log ('eventActions -> getCustomerRegisteredEvents data from error call : ', error);
-        if (error.response && error.response.data) {
-            return dispatch({
-                type: CUSTOMER_EVENTS,
-                payload: error.response.data,
-                status: 'CUSTOMER_EVENTS_GET_FAILED'
+                regestiredEventGetStatus: 'CUSTOMER_REGISTERED_EVENTS_GET_FAILED'
             });
         }
     });
@@ -49,11 +62,11 @@ export const getCustomerEvents = (search, order) => dispatch => {
 export const registerToEvent = (data) => dispatch => {
     console.log("eventActions -> registerToEvent -> method entered");
     axios.defaults.headers.common['authorization']= localStorage.getItem('token');
-    axios.get(`${backend}/events/customers/register`, data)
+    axios.post(`${backend}/events/customers/register`, data)
     .then(response => dispatch({
         type: CUSTOMER_REGISTER_TO_EVENT,
         payload: response.data,
-        status: 'CUSTOMER_REGISTER_TO_EVENT_SUCCESSFUL'
+        registerEventStatus: 'CUSTOMER_REGISTER_TO_EVENT_SUCCESSFUL'
     }))
     .catch(error => {
         console.log ('eventActions -> getCustomerRegisteredEvents data from error call : ', error);
@@ -61,7 +74,7 @@ export const registerToEvent = (data) => dispatch => {
             return dispatch({
                 type: CUSTOMER_REGISTER_TO_EVENT,
                 payload: error.response.data,
-                status: 'CUSTOMER_REGISTER_TO_EVENT_FAILED'
+                registerEventStatus: 'CUSTOMER_REGISTER_TO_EVENT_FAILED'
             });
         }
     });

@@ -18,4 +18,4 @@ const restDishSchema = new Schema({
   versionKey: false,
 });
 
-module.exports = restDishSchema;
+mongoose.model('dish', restDishSchema);

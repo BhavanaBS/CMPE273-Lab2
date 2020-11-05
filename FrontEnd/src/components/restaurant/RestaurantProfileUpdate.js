@@ -4,7 +4,7 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import '../../App.css';
-import { Carousel, Card, Container, Row, Col, Button, Form, Alert } from "react-bootstrap";
+import { Carousel, Card, Container, Row, Col, Button, Form } from "react-bootstrap";
 import { connect } from "react-redux";
 import { updateRestaurant, getRestaurant } from "../../redux/action/restaurantActions";
 import { uploadRestaurantImage } from '../../redux/action/imageUploadActions';
