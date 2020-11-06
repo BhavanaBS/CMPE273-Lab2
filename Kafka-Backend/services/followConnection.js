@@ -92,7 +92,7 @@ function handle_request(msg, callback) {
                     });
                     res.message = JSON.stringify(customer.following);
                     console.log('Yelpers Following : ', customer.following);
-                } else if ( customer.following.length() === 0 ){
+                } else if ( customer.following.length === 0 ){
                     res.message = 'NO_FOLLOWING';
                 }
             }
@@ -111,14 +111,14 @@ function handle_request(msg, callback) {
                 console.log('Found the customer : ',customer);
             
                 var already_following_flag = false;
-                console.log('length : ', customer.following.length());
-                if(customer.following.length()>0) {
+                console.log('length : ', customer.following.length);
+                if(customer.following.length>0) {
                     console.log('Found the customer following: ',customer.following);
                     customer.following.map(following_id => {
                         console.log('following_id : ', following_id);
                         console.log('customer_id : ', msg.customer_id);
                         console.log('compare id : ', following_id.equals(msg.customer_id));
-                        if (following_id.equals(msg.customer_id)) {
+                        if (following_id.equals(msg.following_id)) {
                             res.status = 200;
                             res.message = 'ALREADY_FOLLOWING';
                             console.log('ALREADY_FOLLOWING');
@@ -129,7 +129,7 @@ function handle_request(msg, callback) {
                 } 
                 if(!already_following_flag){
                     console.log('Not ALREADY_FOLLOWING');
-                    customer.following.push(msg.customer_id);
+                    customer.following.push(msg.following_id);
                     customer.save((err, followSuccess) => {
                         console.log('error : ', err, 'results : ', followSuccess);
                         if (err) {

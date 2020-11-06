@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const restDishSchema = require('./rest_dish');
 const restReviewSchema = require('./review');
+const messageSchema = require('./message');
 
 const restProfileSchema = new Schema({
   name: { type: String, required: true },
@@ -18,6 +19,7 @@ const restProfileSchema = new Schema({
   rest_images: [{ type: String }],
   rest_dishes: [restDishSchema],
   reviews: [restReviewSchema],
+  messageas: [messageSchema],
 },
 {
   versionKey: false,

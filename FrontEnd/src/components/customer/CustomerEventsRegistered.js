@@ -8,12 +8,14 @@ class CustomerEventsRegistered extends Component {
     constructor(props) {
         super(props);
         this.setState({
-            errorFlag: false,
         });
     }
 
     componentWillMount() {
-        this.props.getCustomerRegisteredEvents(localStorage.getItem("customer_id"))
+        this.props.getCustomerRegisteredEvents(localStorage.getItem("customer_id"));
+        this.setState({
+            events: null
+        });
     }
 
     componentWillReceiveProps(nextProps) {
@@ -29,7 +31,6 @@ class CustomerEventsRegistered extends Component {
                 console.log('CustomerEventsView -> componentWillReceiveProps -> events : ', events);
                 this.setState({
                     events: events,
-                    activePage: 1
                 });
             }
         }

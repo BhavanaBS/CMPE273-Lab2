@@ -1,66 +1,60 @@
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { getCustomerRegisteredEvents } from '../../redux/action/eventActions'
+import { getCustomersFollowing } from '../../redux/action/followActions'
 import { Container, Alert, Button } from "react-bootstrap";
-import Event from "./Event";
+import Connection from "./Connection";
 
 class CustomerConnectFollowing extends Component {
     constructor(props) {
         super(props);
         this.setState({
-            errorFlag: false,
         });
     }
 
     componentWillMount() {
-        this.props.getCustomerRegisteredEvents(localStorage.getItem("customer_id"))
+        this.props.getCustomersFollowing(localStorage.getItem("customer_id"))
+        this.setState({
+            customersFollowing: null
+        });
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.events) {
-            var { events } = nextProps;
+        if (nextProps.customersFollowing) {
+            var { customersFollowing } = nextProps;
 
-            if(events.noRecord){
-                this.setState({
-                    noRecord: events,
-                    events: [],
-                });
-            } else {
-                console.log('CustomerEventsView -> componentWillReceiveProps -> events : ', events);
-                this.setState({
-                    events: events,
-                    activePage: 1
-                });
-            }
+            console.log('CustomerConnectFollowing -> componentWillReceiveProps -> customersFollowing : ', customersFollowing);
+            this.setState({
+                customersFollowing: customersFollowing,
+            });
         }
     }
 
-    eventsView = (inputEvent) => {
-        let returnEvent = <Event registerYourself={this.registerCustomer} event={inputEvent} showRegister={true}/>;
-        return returnEvent;
+    customersView = (inputCustomer) => {
+        console.log('CustomerConnectFollowing.js -> customersView -> inputCustomer : ', inputCustomer);
+        let returnCustomer = <Connection followUser={this.followCustomer} customer={inputCustomer} showFollow={true}/>;
+        return returnCustomer;
     };
     
     render() {
         let message = null,
-        restEvent,
-            eventRender = [];
+            yelpCustomers,
+            customerRender = [];
 
         if (this.state && this.state.noRecord) {
-            message = <Alert variant="warning">Unable to Fetch Yelpers. PLease retry in sometime.</Alert>;
+            message = <Alert variant="warning">Unable to Fetch Events. PLease retry in sometime</Alert>;
         }
 
-        if (this.state && !this.state.events) {
-            message = <Alert variant="warning">No Yelpers Registered on the website.</Alert>;
-        }
-
-        if (this.state && this.state.events && this.state.events.length === 0) {
-            message = <Alert variant="warning">You have not followed anyone yet.</Alert>;
+        if (this.state && !this.state.customersFollowing) {
+            message = <Alert variant="warning">No Yelpers have Registered yet.</Alert>;
         }
         
-        if (this.state && this.state.events && this.state.events.length > 0) {
-            for (var i = 0; i < this.state.events.length; i++) {
-                restEvent = this.eventsView(this.state.events[i]);
-                eventRender.push(restEvent);
+        if (this.state && this.state.customersFollowing && this.state.customersFollowing === 'NO_FOLLOWING') {
+            message = <Alert variant="warning">Not Following any Yelper so far.</Alert>;
+        } else if (this.state && this.state.customersFollowing && this.state.customersFollowing.length > 0) {
+            console.log('this.state.customersFollowing', this.state.customersFollowing);
+            for (var i = 0; i < this.state.customersFollowing.length; i++) {
+                yelpCustomers = this.customersView(this.state.customersFollowing[i]);
+                customerRender.push(yelpCustomers);
             }
         }
 
@@ -71,8 +65,8 @@ class CustomerConnectFollowing extends Component {
             <h3>Following Yelpers</h3>
             {message}
             
-            {eventRender}
-            <Button href="/c_events/view"> View All Yelpers List</Button>
+            {customerRender}
+            <Button href="/c_connect/view"> View All Yelpers List</Button>
             <br/>
             <br />
             </center>
@@ -82,12 +76,12 @@ class CustomerConnectFollowing extends Component {
 }
 
 const mapStateToProps = state => ({
-    events: state.eventState.customerRegisteredEvents,
+    customersFollowing: state.followState.customersFollowing,
 });
 
 function mapDispatchToProps(dispatch) {
     return {
-        getCustomerRegisteredEvents: customer_id => dispatch(getCustomerRegisteredEvents(customer_id))
+        getCustomersFollowing: customer_id => dispatch(getCustomersFollowing(customer_id))
     };
 }
       

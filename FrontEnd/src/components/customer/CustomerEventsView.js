@@ -13,7 +13,6 @@ class CustomerEventsView extends Component {
     constructor(props) {
         super(props);
         this.setState({
-            errorFlag: false,
             search_input: '',
             order: 'asc',
         });
@@ -34,7 +33,6 @@ class CustomerEventsView extends Component {
 
     componentDidMount() {
         this.setState({
-            errorFlag: false,
             search_input: '',
             order: 'asc',
         });
@@ -120,7 +118,6 @@ class CustomerEventsView extends Component {
             console.log("No registered events, so no need to find index!");
         }
         else if (this.state.registered_events && this.state.registered_events[0]) {
-            console.log("INDEX")
             index = this.state.registered_events.findIndex(e => e.event_id === inputEvent.event_id)
         }
         console.log(index)
@@ -132,10 +129,6 @@ class CustomerEventsView extends Component {
         let message = null,
             restEvent,
             eventRender = [];
-
-        if (this.state && this.state.errorFlag) {
-            message = <Alert variant="warning">Unable to Fetch Events. Please retry in sometime</Alert>;
-        }
 
         if (this.state && !this.state.events) {
             message = <Alert variant="warning">No Events</Alert>;

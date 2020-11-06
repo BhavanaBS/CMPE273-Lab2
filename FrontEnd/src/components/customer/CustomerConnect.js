@@ -1,9 +1,3 @@
-// View list of upcoming events in the order of increasing date
-// 2. Search for event (using event name)
-// 3. Click and view event details
-// 4. Register for an event.
-// 5. View list of registered events
-
 import React, { Component } from 'react';
 import { Redirect } from 'react-router';
 import { NavLink, BrowserRouter as Router, Route } from 'react-router-dom';
@@ -11,7 +5,7 @@ import { Button, Nav } from 'react-bootstrap';
 import CustomerConnectView from "./CustomerConnectView";
 import CustomerConnectFollowing from "./CustomerConnectFollowing";
 
-class CustomerEvents extends Component {
+class CustomerConnect extends Component {
     constructor(props) {
         super(props);
         this.setState({
@@ -58,4 +52,4 @@ class CustomerEvents extends Component {
     }
 }
       
-export default CustomerEvents;
+export default CustomerConnect;
