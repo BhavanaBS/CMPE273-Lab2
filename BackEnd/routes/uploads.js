@@ -90,7 +90,8 @@ router.post('/restaurants/:restaurant_id/dishes/:dish_id/dishImages', checkAuth,
   dishUploads(req, res, (err) => {
     console.log('Image Upload Call for Dish');
     if (err) {
-      console.log('Error Uploading Image');
+      console.log('Error Uploading Image', err);
+      res.status(500).end('System Error');
     } else {
       req.body.path = 'dish_image';
       req.body.restaurant_id = req.params.restaurant_id;

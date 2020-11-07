@@ -6,6 +6,9 @@ import React, { Component } from 'react';
 import { Carousel, Form, Col, Row, Button, Alert} from "react-bootstrap";
 import yelp_logo from "../../images/yelp.png";
 import backend from '../common/serverDetails';
+import { putDish } from "../../redux/action/menuActions";
+import { uploadDishImage } from "../../redux/action/imageUploadActions";
+import { connect } from "react-redux";
 
 class RestaurantMenuEdit extends Component {
     constructor(props) {
@@ -20,13 +23,35 @@ class RestaurantMenuEdit extends Component {
     componentWillMount () {
         let dish = this.props.location.state.dish;
         this.setState({
-            id: dish.id, 
+            id: dish._id, 
             name: dish.name,
             ingredients: dish.ingredients,
             description: dish.description,
             price: dish.price,
             category: dish.category,
+            dishImageIds: dish.dish_image
         });
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.updateDishStatus && nextProps.updateDishStatus !== this.props.updateDishStatus) {
+            var { updateDishStatus } = nextProps;
+            this.setState({
+                updateDishStatus: updateDishStatus
+            });
+        }
+        if (nextProps.dish_image && nextProps.dish_image != this.props.dish_image) {
+            var { dish_image } = nextProps;
+            var { dishImageIds } = this.state;
+            if (dishImageIds && dishImageIds[0]) {
+                dishImageIds.push(dish_image);
+            } else {
+                dishImageIds = [dish_image];
+            }
+            this.setState({
+                dishImageIds: dishImageIds
+            });
+        }
     }
 
     onChange = e => {
@@ -39,18 +64,18 @@ class RestaurantMenuEdit extends Component {
         e.preventDefault();
         const data = {
             rest_id: localStorage.getItem("restaurant_id"),
+            dish_id: this.state.id,
             name: this.state.name,
             ingredients: this.state.ingredients,
             description: this.state.description,
             price: this.state.price,
             category: this.state.category,
         };
-
-        
+        this.props.updateDish(data);
     };
 
     getImageCarouselItem = (imageId) => {
-        let imageSrcUrl = `${backend}/dishes/${this.state.id}/images/${imageId}`;
+        let imageSrcUrl = `${backend}/images/dishes/${this.state.id}/details/${imageId}`;
         console.log(imageSrcUrl);
         return <Carousel.Item>
             <img
@@ -78,6 +103,7 @@ class RestaurantMenuEdit extends Component {
                 "content-type": "multipart/form-data"
             }
         };
+        this.props.uploadDishImage(this.state.id, formData, headers);
     }
 
     render() {
@@ -106,18 +132,12 @@ class RestaurantMenuEdit extends Component {
         }
 
         var errorMessage = null;
-        if(this.state && this.state.errorFlag) {
-            errorMessage = (
-                <div>
-                    <p style={{ color: "red" }}>Dish Update Failed!</p>
-                </div>
-            )
-        } else if(this.state && this.state.successFlag) {
-                errorMessage = (
-                    <div>
-                        <p style={{ color: "green" }}>Dish Updated!</p>
-                    </div>
-                )
+        if(this.state && this.state.updateDishStatus) {
+            if (this.state.updateDishStatus === 'DISH_EDITED') {
+                errorMessage = <Alert variant="success">Dish Updated Successfully</Alert>;
+            } else {
+                errorMessage = <Alert variant="error">Dish Update Failed</Alert>;
+            }
         }
         return(
             
@@ -138,6 +158,7 @@ class RestaurantMenuEdit extends Component {
                     </Col>
                     <Col>
                         <br />
+                        {errorMessage}
                         
                         <Form onSubmit={this.onSubmit}>
                             <Form.Group as={Row} controlId="name">
@@ -186,7 +207,6 @@ class RestaurantMenuEdit extends Component {
                             <Button style={{marginLeft:"22rem"}} variant="danger" href="/r_menu/view">Cancel</Button>  {''}
                             <Button type="sumbit">Update Dish</Button>
                             <br/>
-                            {errorMessage}
                             <br/>   
                         </Form>
                     </Col>
@@ -197,4 +217,17 @@ class RestaurantMenuEdit extends Component {
     }
 }
 
-export default RestaurantMenuEdit;
+const mapStateToProps = state => ({
+    updateDishStatus: state.menuState.updateDishStatus,
+    dish_image: state.imageState.dish_image,
+});
+
+function mapDispatchToProps(dispatch) {
+    return {
+        updateDish: data => dispatch(putDish(data)),
+        uploadDishImage: (dish_id, formData, uploadImageConfig) => 
+            dispatch(uploadDishImage(dish_id, formData, uploadImageConfig))
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps) (RestaurantMenuEdit);

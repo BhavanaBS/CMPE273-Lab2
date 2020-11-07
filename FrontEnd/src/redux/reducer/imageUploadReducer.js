@@ -3,7 +3,7 @@ import { UPLOAD_CUST_IMAGE, UPLOAD_REST_IMAGE, UPLOAD_DISH_IMAGE } from '../acti
 const initialState = {
     cust_image: {},
     rest_image: {},
-    item_image: {}
+    dish_image: {}
 };
 
 export default function (state = initialState, action) {
@@ -21,7 +21,7 @@ export default function (state = initialState, action) {
         case UPLOAD_DISH_IMAGE:
             return {
                 ...state,
-                item_image: action.payload
+                dish_image: action.payload
             };
         default:
             return state;

@@ -19,3 +19,4 @@ const restDishSchema = new Schema({
 });
 
 mongoose.model('dish', restDishSchema);
+module.exports = restDishSchema;

@@ -64,6 +64,7 @@ function handle_request(msg, callback) {
     });
   } else if (msg.path === 'dish_get_perticular') {
     console.log('Entered dish_get_perticular');
+    console.log('dish_id :', msg.dish_id, 'restaurant_id : ', msg.restaurant_id);
     Restaurant.findById(msg.restaurant_id, (err, restaurant) => {
       if (err) {
         res.status = 500;

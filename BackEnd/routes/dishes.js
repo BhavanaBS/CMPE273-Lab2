@@ -53,6 +53,7 @@ router.get('/restaurants/:restaurant_id/dish/:dish_id', checkAuth, (req, res) =>
   req.body.restaurant_id = req.params.restaurant_id;
   req.body.dish_id = req.params.dish_id;
   console.log('dishes.js -> dish_get_perticular-> Authentication Completed');
+  console.log('dish_id :', req.params.dish_id, 'restaurant_id : ', req.params.restaurant_id);
   kafka.make_request('dishes', req.body, (err, results) => {
     console.log('error : ', err, 'results : ', results);
     if (err) {
