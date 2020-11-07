@@ -148,7 +148,7 @@ class CustomerConnectView extends Component {
             locationDropdown = null,
             pagesBar = null,
             active = 1,
-            itemsToShow = 1;
+            itemsToShow = 5;
 
         if (this.state && this.state.activePage) {
             active = this.state.activePage;

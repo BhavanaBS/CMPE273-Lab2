@@ -49,6 +49,7 @@ class RestaurantEventsDetails extends Component {
 
         let participants = [], participant, message;
         let detailsModal, modalParticipant, modalParticipantImgSrc;
+        
         for (var i = 0; i < this.state.event.participants.length; i++) {
             if(this.state.event.participants[i]){    
                 participant = this.participantView((i+1), this.state.event.participants[i]);
