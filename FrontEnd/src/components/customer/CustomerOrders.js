@@ -4,57 +4,43 @@
  
 import React, { Component } from 'react';
 import { Alert, Table, Button, Modal} from "react-bootstrap";
-import axios from 'axios';
 import 'react-bootstrap-table2-filter/dist/react-bootstrap-table2-filter.min.css';
 import filterFactory, { textFilter } from 'react-bootstrap-table2-filter';
 import BootstrapTable from 'react-bootstrap-table-next';
-import backend from '../common/serverDetails';
-
-// const selectOptions = {
-//     0: 'Order Placed',
-//     1: 'Delivered',
-//     2: 'Picked Up',
-//     3: 'Ready For Pick Up',
-//     4: 'Preparing',
-//     5: 'On The Way',
-//     6: 'Cancelled'
-//   };
+import { connect } from "react-redux";
+import { getCustomerOrders } from "../../redux/action/orderActions";
+import paginationFactory from 'react-bootstrap-table2-paginator';
 
 class CustomerOrders extends Component {
     constructor(props) {
         super(props);
         this.setState({
-            successFlag : false,
-            errorFlag : false,
-            deliveryMethod : "Home Delivery",
-            cust_id : localStorage.getItem("customer_id"),
+            noRecord: false,
         });
-        this.getCustomerOrders();
     }
 
+    componentWillMount(){
+        this.props.getCustomerOrders(localStorage.getItem("customer_id"));
+    }
 
-    getCustomerOrders() {
-        let cust_id = localStorage.getItem("customer_id");
-        axios.defaults.withCredentials = true;
-        axios.get(`${backend}/customers/${cust_id}/orders`)
-            .then(response => {
-                if (response.data) {
-                    this.setState({
-                        orders: response.data,
-                        errorFlag: false,
-                        successFlag : true,
-                    });
-                }
-            })
-            .catch(err => {
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.orders) {
+            var { orders } = nextProps;
+
+            if(orders.noRecord){
                 this.setState({
-                    errorFlag: true,
-                    successFlag : false,
+                    noRecord: orders.noRecord,
+                    ordersList: [],
                 });
-            });
+            } else {
+                console.log('CustomerOrders -> componentWillReceiveProps -> orders : ', orders);
+                this.setState({
+                    ordersList: orders.ordersList,
+                    activePage: 1
+                });
+            }
+        }
     }
-
-
 
     showOrder = (e) => {
         console.log(e.target);
@@ -65,13 +51,12 @@ class CustomerOrders extends Component {
 
     ordersView = (index, order) => {
         var date = new Date(order.create_time);
-        var status = order.status === "NEW" ? "Order Placed" : order.status;
         
         return <tr>
                     <td>{index}</td>
                     <td>{order.rest_name}</td>
                     <td>{date.toLocaleString()}</td>
-                    <td>{status}</td>
+                    <td>{order.status}</td>
                     <td><Button onClick={this.showOrder} name={order.id}>Order Details</Button></td>
                 </tr>;
     }
@@ -79,7 +64,7 @@ class CustomerOrders extends Component {
     dishView = (index, dish) => {
         return <tr>
                     <td>{index}</td>
-                    <td>{dish.name}</td>
+                    <td>{dish.dish_name}</td>
                     <td>{dish.quantity}</td>
                     <td>{dish.price * dish.quantity}</td>
                 </tr>;
@@ -113,67 +98,42 @@ class CustomerOrders extends Component {
         text: 'Details'
       }];
 
-    getLocaleTime = (create_time) => {
-        var ts = new Date(create_time);
-        console.log("Timestamp:", ts.toLocaleString);
-        return ts.toLocaleString();
-    }
-
-    convertStatus = (status) => {
-        if (status === "NEW") {
-            return "Order Placed";
-        }
-        return status;
-    }
-
     render () {
 
         let message, orders_table, bootstrapTable;
         let details_modal, modal_order, dish_details_in_modal = [], dish;
-        if(this.state && !this.state.orders) {
+        if(this.state && this.state.noRecord) {
             message = <Alert varient ="warning">No Order History.</Alert>
         }
 
-        if(this.state && this.state.errorFlag) {
-            message = <Alert varient ="warning">Error Fetching Order History.</Alert>
-        }
-
-        if (this.state && this.state.orders) {
-            // for (var i = 0; i < this.state.orders.length; i++) {
-            //     if(this.state.orders[i]){    
-            //         order = this.ordersView((i+1), this.state.orders[i]);
-            //         orders.push(order);
-            //     }
-            // }
-
-            let bootStrapTableOrders = this.state.orders.map(o => { return {
-                id: o.id,
-                rest_name:o.rest_name,
-                create_time: this.getLocaleTime(o.create_time),
-                status: this.convertStatus(o.status),
-                details: <Button onClick={this.showOrder} name={o.id}>Order Details</Button>
+        if (this.state && this.state.ordersList) {
+            let bootStrapTableOrders = this.state.ordersList.map(o => { return {
+                id: o.order_id,
+                rest_name:o.restaurant_name,
+                create_time: o.create_time,
+                status: o.status,
+                details: <Button onClick={this.showOrder} name={o.order_id}>Order Details</Button>
             }});
 
-            // orders_table = <div><Table striped bordered hover>
-            //                     <thead>
-            //                         <tr>
-            //                         <th>#</th>
-            //                         <th>Restaurant Name</th>
-            //                         <th>Order Time</th>
-            //                         <th>Staus</th>
-            //                         <th>Details</th>
-            //                         </tr>
-            //                     </thead>
-            //                     <tbody>
-            //                         {orders}
-            //                     </tbody>
-            //                 </Table>
-            //                 </div>;
+            var pagination = paginationFactory({
+                page: 1,
+                paginationSize: 5,
+                sizePerPageList: [ {
+                    text: '2', value: 2
+                  }, {
+                    text: '5', value: 5
+                  }, {
+                    text: 'All', value: this.state.ordersList.length
+                  } ]
+                
+            });
+
             bootstrapTable = <BootstrapTable 
                                 keyField='id' 
                                 data={bootStrapTableOrders} 
                                 columns={this.columns}
                                 filter={ filterFactory() }
+                                pagination={ pagination }
                                 >
                             </BootstrapTable>
             
@@ -181,11 +141,11 @@ class CustomerOrders extends Component {
 
         if (this.state && this.state.modal_order_id) {
             console.log("Modal OrderId", this.state.modal_order_id)
-            modal_order = this.state.orders.find(o => o.id === parseInt(this.state.modal_order_id, 10));
+            modal_order = this.state.ordersList.find(o => o.order_id === this.state.modal_order_id);
             console.log("Modal Order:", modal_order);
-            for (var i = 0; i < modal_order.dishes.length; i++) {
-                if(modal_order.dishes[i]){    
-                    dish = this.dishView((i+1), modal_order.dishes[i]);
+            for (var i = 0; i < modal_order.order_dishes.length; i++) {
+                if(modal_order.order_dishes[i]){    
+                    dish = this.dishView((i+1), modal_order.order_dishes[i]);
                     dish_details_in_modal.push(dish);
                 }
             }
@@ -246,6 +206,14 @@ class CustomerOrders extends Component {
     }
 }
 
+const mapStateToProps = state => ({
+    orders: state.ordersState.customerOrders,
+});
 
+function mapDispatchToProps(dispatch) {
+    return {
+        getCustomerOrders:customer_id => dispatch(getCustomerOrders(customer_id))
+    };
+}
 
-export default CustomerOrders;
+export default connect(mapStateToProps, mapDispatchToProps)(CustomerOrders);

@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import { connect } from "react-redux";
-import { Container, Alert, InputGroup, FormControl, Button, Form, Row, Col } from "react-bootstrap";
+import { Container, Alert, InputGroup, FormControl, Button, Form, Row, Col, Pagination } from "react-bootstrap";
 import Event from "./Event";
 import { getCustomerEvents, getCustomerRegisteredEvents, registerToEvent } from '../../redux/action/eventActions'
 
@@ -21,6 +21,7 @@ class CustomerEventsView extends Component {
         this.onSearchSubmit = this.onSearchSubmit.bind(this);
         this.props.getCustomerEvents("", "asc");
         this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
+        this.changePage = this.changePage.bind(this);
     }
 
     componentDidUpdate() {
@@ -50,16 +51,13 @@ class CustomerEventsView extends Component {
                 this.setState({
                     noRecord: events.noRecord,
                     events: [],
-                    // search_input: '',
-                    // order: 'asc',
                 });
             } else {
                 console.log('CustomerEventsView -> componentWillReceiveProps -> events : ', events);
                 this.setState({
                     events: events,
                     noRecord: false,
-                    // search_input: '',
-                    // order: 'asc',
+                    activePage: 1
                 });
             }
         }
@@ -79,6 +77,20 @@ class CustomerEventsView extends Component {
             this.props.getCustomerRegisteredEvents(localStorage.getItem('customer_id'));
         }
     }
+
+    changePage = (e) => {
+        let page = this.state.activePage;
+        if (e.target.text === ">" && page !== parseInt(e.target.name)) {
+            page += 1;
+        } else if (e.target.text === "<" && page !== parseInt(e.target.name)) {
+            page -= 1;
+        } else {
+            page = parseInt(e.target.name);
+        }
+        this.setState({
+            activePage: page
+        });
+    };
 
     onSearchSubmit = (e) => {
         e.preventDefault();
@@ -128,8 +140,15 @@ class CustomerEventsView extends Component {
     render() {
         let message = null,
             restEvent,
-            eventRender = [];
+            eventRender = [],
+            pagesBar = null,
+            itemsToShow = 5,
+            active = 1;
 
+        if (this.state && this.state.activePage) {
+            active = this.state.activePage;
+        }
+    
         if (this.state && !this.state.events) {
             message = <Alert variant="warning">No Events</Alert>;
         }
@@ -139,10 +158,39 @@ class CustomerEventsView extends Component {
         }
 
         if (this.state && this.state.events && this.state.events.length > 0) {
-            for (var i = 0; i < this.state.events.length; i++) {
+
+            let events = this.state.events;
+            let cardCount = 0;
+
+            for (let i = (active - 1) * itemsToShow; i < events.length; i++) {
+                console.log('**************** events : ', events[i]);
                 restEvent = this.eventsView(this.state.events[i]);
                 eventRender.push(restEvent);
+                cardCount++;
+                if (cardCount === itemsToShow)
+                    break;
             }
+
+            let pages = [];
+            let pageCount = Math.ceil(events.length / itemsToShow);
+
+            for (let i = 1; i <= pageCount; i++) {
+                pages.push(
+                    <Pagination.Item key={i} active={i === active} name={i} onClick={this.changePage}>
+                        {i}
+                    </Pagination.Item>
+                );
+            }
+            pagesBar = (
+                <div>
+                    <br />
+                    <Pagination>
+                        <Pagination.Prev name="1" onClick={this.changePage} />
+                        {pages}
+                        <Pagination.Next name={pageCount} onClick={this.changePage} />
+                    </Pagination>
+                </div>
+            );
         }
 
         return (
@@ -179,6 +227,7 @@ class CustomerEventsView extends Component {
             {message}
             <br />
             {eventRender}
+            {pagesBar}
             </center>
         </Container>
         );

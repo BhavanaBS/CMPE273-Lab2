@@ -8,6 +8,7 @@ import reviewsReducer from './reviewsReducer'
 import eventReducer from './eventReducer'
 import menuReducer from './menuReducer'
 import followReducer from './followReducer'
+import ordersReducer from './ordersReducer'
 
 export default combineReducers({
     profileState: profileReducer,
@@ -19,4 +20,5 @@ export default combineReducers({
     eventState: eventReducer,
     menuState: menuReducer,
     followState: followReducer,
+    ordersState: ordersReducer
 })

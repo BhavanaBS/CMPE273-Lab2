@@ -4,11 +4,11 @@
 
 import React, { Component } from 'react';
 import { Card, Container, ListGroup, Row, Col, Form, Button, ButtonGroup, Carousel } from "react-bootstrap";
-import axios from 'axios';
 import CustomerMenuDish from './CustomerMenuDish';
 import yelp_logo from "../../images/yelp_logo.png";
 import backend from '../common/serverDetails';
 import { postRestaurantReview } from "../../redux/action/reviewsAction";
+import { customerMenuGet } from "../../redux/action/menuActions";
 import { connect } from "react-redux";
 
 class CustomersRestaurantView extends Component {
@@ -26,24 +26,7 @@ class CustomersRestaurantView extends Component {
             },
             categories: ["Main Course", "Salads", "Appetizer", "Desserts", "Beverages"]
         });
-        this.getDishes(this.props.location.state.id);
     }
-
-    getDishes = (rest_id) => {
-        axios.get(`${backend}/restaurants/${rest_id}/dishes`)
-            .then(response => {
-                if (response.data[0]) {
-                    this.setState({
-                        dishes: response.data
-                    });
-                }
-            })
-            .catch(err => {
-                if (err.response && err.response.data) {
-                    console.log(err.response.data);
-                }
-            });
-    };
 
     onReviewSubmit = (e) => {
         //prevent page from refresh
@@ -67,13 +50,13 @@ class CustomersRestaurantView extends Component {
 
     dishesView = (category) => {
         var categoriesView = [], dishes, dish, categoryHtml;
-        if (this.state && this.state.dishes && this.state.dishes.length > 0) {
-            dishes = this.state.dishes.filter(dish => dish.category === category);
+        if (this.state && this.state.resData && this.state.resData.rest_dishes && this.state.resData.rest_dishes.length > 0) {
+            dishes = this.state.resData.rest_dishes.filter(dish => dish.category === category);
             if (dishes.length > 0) {
                 categoryHtml = <h4>{category}</h4>;
                 categoriesView.push(categoryHtml);
                 for (var i = 0; i < dishes.length; i++) {
-                    dish = <CustomerMenuDish dish={dishes[i]} deleteDish={this.deleteDish}/>;
+                    dish = <CustomerMenuDish dish={dishes[i]} rest_id={this.state.resData._id}/>;
                     categoriesView.push(dish);
                 }
             }
@@ -261,12 +244,15 @@ class CustomersRestaurantView extends Component {
 const mapStateToProps = state => {
     return {
       status: state.reviewsState.status,
+      
     };
 };
 
 function mapDispatchToProps(dispatch) {
     return {
         postRestaurantReview: data => dispatch(postRestaurantReview(data)),
+        customerMenuGet: (rest_id) => dispatch(customerMenuGet(rest_id)),
+
     };
 }
 

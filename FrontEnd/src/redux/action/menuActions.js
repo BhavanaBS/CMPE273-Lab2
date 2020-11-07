@@ -116,3 +116,25 @@ export const deleteDish = (dish_id) => dispatch => {
         }
     });
 }
+
+export const customerMenuGet = (rest_id) => dispatch => {
+    console.log("menuActions.js -> customerMenuGet -> method entered");
+    let restaurant_id = localStorage.getItem('restaurant_id');
+    axios.defaults.headers.common['authorization']= localStorage.getItem('token');
+    axios.get(`${backend}/dishes/restaurants/${restaurant_id}`)
+    .then(response => dispatch({
+        type: CUSTOMER_MENU_GET,
+        payload: response.data,
+        status: 'CUSTOMER_MENU_GET_SUCCESSFUL'
+    }))
+    .catch(error => {
+        console.log ('menuActions.js -> customerMenuGet data from error call : ', error);
+        if (error.response && error.response.data) {
+            return dispatch({
+                type: CUSTOMER_MENU_GET,
+                payload: error.response.data,
+                status: 'CUSTOMER_MENU_GET_FAILED'
+            });
+        }
+    });
+}

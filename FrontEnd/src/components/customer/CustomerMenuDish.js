@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Card, Button, Col, Row, Modal, Carousel } from "react-bootstrap";
 import yelp_logo from "../../images/yelp.png";
-import axios from 'axios';
 import backend from '../common/serverDetails';
 
 class CustomerMenuDish extends Component {
@@ -9,7 +8,6 @@ class CustomerMenuDish extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.getDishImageIds();
   }
 
   openModal = () => {
@@ -32,10 +30,10 @@ class CustomerMenuDish extends Component {
   };
 
   addDishToCart = (e) => {
-    let dish_id = this.props.dish.id;
+    let dish_id = this.props.dish._id;
     let dishes_in_cart = [];
 
-    if (parseInt(localStorage.getItem("cart_restaurant_id"), 10) !== this.props.dish.rest_id) {
+    if (localStorage.getItem("cart_restaurant_id") !== this.props.rest_id) {
       localStorage.setItem("dishes_in_cart", dishes_in_cart);
     }
 
@@ -43,10 +41,10 @@ class CustomerMenuDish extends Component {
         dishes_in_cart.push(...JSON.parse(localStorage.getItem("dishes_in_cart")));
     }
 
-    let index = dishes_in_cart.findIndex((dish_in_cart => dish_in_cart.id === dish_id));
+    let index = dishes_in_cart.findIndex((dish_in_cart => dish_in_cart.dish_id === dish_id));
     if (index === -1) {
-      dishes_in_cart.push({ id: dish_id, dish_quantity: this.state.dish_quantity || 1, dish_name: this.props.dish.name, dish_price: this.props.dish.price });
-      localStorage.setItem("cart_restaurant_id", this.props.dish.rest_id);
+      dishes_in_cart.push({ dish_id: dish_id, quantity: this.state.dish_quantity || 1, dish_name: this.props.dish.name, dish_price: this.props.dish.price });
+      localStorage.setItem("cart_restaurant_id", this.props.rest_id);
       localStorage.setItem("dishes_in_cart", JSON.stringify(dishes_in_cart));
       this.setState({
         showAddToCartModal: false,
@@ -56,14 +54,14 @@ class CustomerMenuDish extends Component {
   };
 
   removeDishFromCart = (e) => {
-    let dish_id = this.props.dish.id;
+    let dish_id = this.props.dish._id;
     let dishes_in_cart = [];
 
     if (localStorage.getItem("dishes_in_cart")) {
       dishes_in_cart.push(...JSON.parse(localStorage.getItem("dishes_in_cart")));
     }
 
-    let index = dishes_in_cart.findIndex((dish_in_cart => dish_in_cart.id === dish_id));
+    let index = dishes_in_cart.findIndex((dish_in_cart => dish_in_cart.dish_id === dish_id));
     if(index !== -1){
       e.target.textContent = "Add to Cart";
       e.target.className = "btn btn-primary";
@@ -75,29 +73,8 @@ class CustomerMenuDish extends Component {
     }
   };
 
-  getDishImageIds = () => {
-    console.log("Fetching the imageIds for dishId ", this.props.dish.id);
-    axios.get(`${backend}/dishes/${this.props.dish.id}/images`)
-        .then(response => {
-            console.log("Status Code : ",response.status, "Response JSON : ",response.data);
-            if (response.status === 200) {
-                if (response.data) {
-                    this.setState({
-                        dishImageIds: response.data
-                    });
-                }
-                console.log("Fetching image ids for dish id success!",this.props.dish.id);
-            } else {
-                console.log("Fetching image ids for dish failed!");
-            }
-        })
-        .catch((error) => {
-            console.log("Fetching image ids for dish failed!", error);
-        });
-  }
-
   getImageCarouselItem = (imageId) => {
-    let imageSrcUrl = `${backend}/dishes/${this.props.dish.id}/images/${imageId}`;
+    let imageSrcUrl = `${backend}/images/dishes/${this.props.dish._id}/details/${imageId}`;
     console.log("Individual Image",imageSrcUrl);
     return <Carousel.Item>
         <img
@@ -119,18 +96,19 @@ class CustomerMenuDish extends Component {
 
     if (localStorage.getItem("dishes_in_cart")) {
       dishes_in_cart.push(...JSON.parse(localStorage.getItem("dishes_in_cart")));
-      dishes_in_cart_ids = dishes_in_cart.map(dishes_in_cart => dishes_in_cart.id);
-      buttonText = dishes_in_cart_ids.includes(this.props.dish.id) ? "Remove Dish From Cart" : buttonText;
-      onButtonClick = dishes_in_cart_ids.includes(this.props.dish.id) ? this.removeDishFromCart : onButtonClick;
+      dishes_in_cart_ids = dishes_in_cart.map(dishes_in_cart => dishes_in_cart.dish_id);
+      console.log("dishes_in_cart_ids", dishes_in_cart_ids);
+      buttonText = dishes_in_cart_ids.includes(this.props.dish._id) ? "Remove Dish From Cart" : buttonText;
+      onButtonClick = dishes_in_cart_ids.includes(this.props.dish._id) ? this.removeDishFromCart : onButtonClick;
     }
 
     if(this.state) {
       showAddToCartModal = this.state.showAddToCartModal;
     }
 
-    if (this.state && this.state.dishImageIds && this.state.dishImageIds[0]) {
-      for (var i = 0; i < this.state.dishImageIds.length; i++) {
-          carousel = this.getImageCarouselItem(this.state.dishImageIds[i]);
+    if (this.props && this.props.dish && this.props.dish.dish_image[0]) {
+      for (var i = 0; i < this.props.dish.dish_image.length; i++) {
+          carousel = this.getImageCarouselItem(this.props.dish.dish_image[i]);
           carouselList.push(carousel);
       }
     } else {
@@ -154,7 +132,7 @@ class CustomerMenuDish extends Component {
                 <Card.Title>{this.props.dish.name}</Card.Title>
                 <Card.Text><p>{this.props.dish.description}</p></Card.Text>
                 <Card.Text>Price: $ {this.props.dish.price}</Card.Text>
-                <Button onClick={onButtonClick} name={this.props.dish.id}>{buttonText}</Button>&nbsp; &nbsp;
+                <Button onClick={onButtonClick} name={this.props.dish._id}>{buttonText}</Button>&nbsp; &nbsp;
               </Card.Body>
             </Col>
             <Col align="right" style={{marginRight:'2rem'}}>
@@ -171,7 +149,7 @@ class CustomerMenuDish extends Component {
           <Modal.Body>
             <center>
               <p>{this.props.dish.description}</p>
-              Quantity: <input type="number" name={this.props.dish.id} min="1" max="10" width="10%" onChange={this.onQuantityChange} defaultValue="1" autofocus></input>
+              Quantity: <input type="number" name={this.props.dish._id} min="1" max="10" width="10%" onChange={this.onQuantityChange} defaultValue="1" autofocus></input>
             </center>
           </Modal.Body>
           <Modal.Footer>

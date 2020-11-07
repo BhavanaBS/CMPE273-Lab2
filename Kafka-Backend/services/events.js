@@ -1,7 +1,5 @@
-// customer : search for event
 const Events = require('../models/event');
 const Customer = require('../models/cust_profile');
-// const { search } = require('../../BackEnd/routes/events');
 
 function handle_request(msg, callback) {
     var res = {};

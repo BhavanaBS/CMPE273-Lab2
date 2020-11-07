@@ -4,8 +4,8 @@
 
 import React, { Component } from 'react';
 import { Alert, Table, Button, Dropdown, Modal } from "react-bootstrap";
-import axios from 'axios';
-import backend from '../common/serverDetails';
+import { createOrder } from "../../redux/action/orderActions";
+import { connect } from "react-redux";
 
 class Cart extends Component {
     constructor(props) {
@@ -15,6 +15,24 @@ class Cart extends Component {
             errorFlag : false,
             deliveryMethod : "Home Delivery"
         });
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.orderCreateStatus) {
+            if(nextProps.orderCreateStatus === 'ORDER_POST_SUCCESS') {
+                localStorage.setItem("dishes_in_cart", "");
+                localStorage.setItem("cart_restaurant_id", "");
+                this.setState({
+                    successFlag: true,
+                    errorFlag : false,
+                });
+            } else {
+                this.setState({
+                    successFlag: false,
+                    errorFlag : true,
+                });
+            }
+        }
     }
 
     componentDidMount(){
@@ -47,34 +65,13 @@ class Cart extends Component {
 
     placeOrder = () => {
         console.log("Order Submit Call");
-
-        axios.defaults.withCredentials = true;
-        //make a post request with the user data
-        let data = Object.assign({}, {rest_id: this.state.cart_restaurant_id, cust_id: localStorage.getItem("customer_id"), delivery_method: this.state.deliveryMethod},{dishes:this.state.dishes_in_cart});
-        axios.post(`${backend}/orders`, data)
-            .then(response => {
-                console.log("Order Creation Status : ",response.status, "Response JSON : ",response.data);
-                if (response.status !== 200) {
-                    this.setState({
-                        errorFlag : true,
-                        successFlag : false,
-                    });
-                } else if (response.status === 200) {
-                    this.setState({
-                        errorFlag : false,
-                        successFlag : true,
-                    });
-                    localStorage.setItem("dishes_in_cart", "");
-                    localStorage.setItem("cart_restaurant_id", "");
-                }
-            })
-            .catch((error) => {
-                console.log("Order Creation Failed!", error);
-                this.setState({
-                    errorFlag : true,
-                    successFlag : false,
-                });
-            });
+        let data = Object.assign({}, {
+            restaurant_id: this.state.cart_restaurant_id, 
+            customer_id: localStorage.getItem("customer_id"), 
+            delivery_method: this.state.deliveryMethod},
+            { order_dishes: this.state.dishes_in_cart }
+        );
+        this.props.createOrder(data);
     }
 
     render() {
@@ -168,4 +165,17 @@ class Cart extends Component {
         )
     }
 }
-export default Cart;
+
+const mapStateToProps = state => {
+    return {
+        orderCreateStatus: state.ordersState.orderCreateStatus,
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        createOrder: data => dispatch(createOrder(data)),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps) (Cart);

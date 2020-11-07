@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { Card, Row, Col, Carousel  } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import yelp_logo from "../../images/yelp_logo.png";
-import axios from 'axios';
 import backend from '../common/serverDetails';
 
 class CustomerRestaurantSearchCard extends Component {

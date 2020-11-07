@@ -40,7 +40,7 @@ class RestaurantMenuEdit extends Component {
                 updateDishStatus: updateDishStatus
             });
         }
-        if (nextProps.dish_image && nextProps.dish_image != this.props.dish_image) {
+        if (nextProps.dish_image && nextProps.dish_image !== this.props.dish_image) {
             var { dish_image } = nextProps;
             var { dishImageIds } = this.state;
             if (dishImageIds && dishImageIds[0]) {
