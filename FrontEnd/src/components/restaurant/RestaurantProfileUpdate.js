@@ -40,7 +40,8 @@ class RestaurantProfileForm extends Component {
                 timings: nextProps.restaurant.timings,
                 delivery_method: nextProps.restaurant.delivery_method,
                 map_location: nextProps.restaurant.map_location,
-                rest_images: nextProps.restaurant.rest_images
+                rest_images: nextProps.restaurant.rest_images,
+                cuisine: nextProps.restaurant.cuisine,
             })
         }
 
@@ -258,6 +259,21 @@ class RestaurantProfileForm extends Component {
                                             required={true}
                                             pattern="^[0-9 :-]+$"
                                             placeholder="Update Timings"
+                                            style={{ width: '30rem' }}
+                                            />
+                                    </Form.Group>
+                                </Form.Row>
+                                <Form.Row>
+                                    <Form.Group as={Row} controlId="timings">
+                                        <Form.Label style={{ width: '15rem' }}>Cuisine</Form.Label>
+                                        <Form.Control 
+                                            type="text"
+                                            name="cuisine"
+                                            onChange={this.onChange}
+                                            value={this.state.cuisine}
+                                            required={true}
+                                            pattern="^[A-Za-z0-9 ,.]+$"
+                                            placeholder="Update Cuisine"
                                             style={{ width: '30rem' }}
                                             />
                                     </Form.Group>

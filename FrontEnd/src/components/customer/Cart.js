@@ -58,8 +58,8 @@ class Cart extends Component {
         return <tr>
                     <td>{index}</td>
                     <td>{dish.dish_name}</td>
-                    <td>{dish.dish_quantity}</td>
-                    <td>{dish.dish_price * dish.dish_quantity}</td>
+                    <td>{dish.quantity}</td>
+                    <td>{dish.dish_price * dish.quantity}</td>
                 </tr>;
     }
 

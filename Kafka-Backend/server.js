@@ -1,5 +1,5 @@
 var connection = new require('./kafka/connection');
-//topics files
+
 var Passport = require('./services/passport');
 var Signup = require('./services/signup');
 var Login = require('./services/login');
@@ -35,12 +35,6 @@ mongoose.connect(mongoDB, options, (err, res) => {
     }
 });
 
-// fs.readdirSync(__dirname + '/dbSchema').forEach(filename => {
-//     if (~filename.indexOf('.js')) {
-//         require(__dirname + '/dbSchema/' + filename)
-//     }
-// });
-
 function handleTopicRequest(topic_name, fname) {
     //var topic_name = 'root_topic';
     var consumer = connection.getConsumer(topic_name);
@@ -69,9 +63,7 @@ function handleTopicRequest(topic_name, fname) {
 
     });
 }
-// Add your TOPICs here
-//first argument is topic name
-//second argument is a function that will handle this topic request
+
 handleTopicRequest("authentication", Passport);
 handleTopicRequest("signup", Signup);
 handleTopicRequest("login", Login);

@@ -55,7 +55,7 @@ KafkaRPC.prototype.makeRequest = function (topicName, content, callback) {
       },
     ];
     console.log('Inside kafkarpc.js -> setupResponseQueue -> after constructing payload');
-    console.log(self.producer.ready);
+    console.log('self.producer.ready', self.producer.ready);
     self.producer.send(payloads, (err, data) => {
       console.log('Inside kafkarpc.js -> setupResponseQueue -> logging step');
       if (err) console.log(err);
