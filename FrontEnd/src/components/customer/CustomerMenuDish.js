@@ -131,6 +131,7 @@ class CustomerMenuDish extends Component {
               <Card.Body>
                 <Card.Title>{this.props.dish.name}</Card.Title>
                 <Card.Text><p>{this.props.dish.description}</p></Card.Text>
+                <Card.Text>Category: {this.props.dish.category}</Card.Text>
                 <Card.Text>Price: $ {this.props.dish.price}</Card.Text>
                 <Button onClick={onButtonClick} name={this.props.dish._id}>{buttonText}</Button>&nbsp; &nbsp;
               </Card.Body>

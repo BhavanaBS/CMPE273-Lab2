@@ -26,7 +26,7 @@ class Dish extends Component {
   render() {
     let carouselList = [], carousel;
 
-  if (this.props && this.props.dish && this.props.dish.dish_image[0]) {
+  if (this.props && this.props.dish && this.props.dish.dish_image && this.props.dish.dish_image[0]) {
     for (var i = 0; i < this.props.dish.dish_image.length; i++) {
         carousel = this.getImageCarouselItem(this.props.dish.dish_image[i]);
         carouselList.push(carousel);
@@ -45,7 +45,7 @@ class Dish extends Component {
 
     return (
       <div>
-        <Card bg="light" style={{width:'40rem', height:'15rem'}}>
+        <Card bg="light" style={{width:'40rem', height:'18rem'}}>
           <Row>
             <Col  align="left" style={{width:'15rem', height:'15rem'}}>
               <Carousel style={{width:'15rem', height:'15rem'}}>
@@ -55,7 +55,8 @@ class Dish extends Component {
             <Col align="left" style={{width:'20rem', height:'15rem'}}>
               <Card.Body>
                 <Card.Title><h4><i>{this.props.dish.name}</i></h4></Card.Title>
-                <Card.Text><p>{this.props.dish.description}</p></Card.Text>
+                <Card.Text>{this.props.dish.description}</Card.Text>
+                <Card.Text>Category: {this.props.dish.category}</Card.Text>
                 <Card.Text>Price: $ {this.props.dish.price}</Card.Text>
                 <Link to={{ pathname: "/r_menu/update", state: { dish: this.props.dish } }}>
                 <Button name={this.props.dish.id}>Edit</Button>&nbsp;

@@ -3,7 +3,7 @@
 // 3. Order food from the page, select delivery method.
 
 import React, { Component } from 'react';
-import { Card, Container, ListGroup, Row, Col, Form, Button, ButtonGroup, Carousel } from "react-bootstrap";
+import { Card, Container, ListGroup, Row, Col, Form, Button, ButtonGroup, Carousel, Pagination } from "react-bootstrap";
 import CustomerMenuDish from './CustomerMenuDish';
 import yelp_logo from "../../images/yelp_logo.png";
 import backend from '../common/serverDetails';
@@ -14,9 +14,7 @@ import { connect } from "react-redux";
 class CustomersRestaurantView extends Component {
     constructor(props) {
         super(props);
-        this.setState({
-            categories: ["Main Course", "Salads", "Appetizer", "Desserts", "Beverages"],
-        });
+        this.changePage = this.changePage.bind(this);
     }
 
     componentWillMount () {
@@ -24,7 +22,7 @@ class CustomersRestaurantView extends Component {
             resData: this.props.location.state,
             reviews: {
             },
-            categories: ["Main Course", "Salads", "Appetizer", "Desserts", "Beverages"]
+            activePage: 1
         });
     }
 
@@ -48,20 +46,22 @@ class CustomersRestaurantView extends Component {
         });
     };
 
-    dishesView = (category) => {
-        var categoriesView = [], dishes, dish, categoryHtml;
-        if (this.state && this.state.resData && this.state.resData.rest_dishes && this.state.resData.rest_dishes.length > 0) {
-            dishes = this.state.resData.rest_dishes.filter(dish => dish.category === category);
-            if (dishes.length > 0) {
-                categoryHtml = <h4>{category}</h4>;
-                categoriesView.push(categoryHtml);
-                for (var i = 0; i < dishes.length; i++) {
-                    dish = <CustomerMenuDish dish={dishes[i]} rest_id={this.state.resData._id}/>;
-                    categoriesView.push(dish);
-                }
-            }
-            return categoriesView;
+    dishesView = (inputDish) => {
+        return <CustomerMenuDish dish={inputDish} rest_id={this.state.resData._id}/>;
+    };
+
+    changePage = (e) => {
+        let page = this.state.activePage;
+        if (e.target.text === ">" && page !== parseInt(e.target.name)) {
+            page += 1;
+        } else if (e.target.text === "<" && page !== parseInt(e.target.name)) {
+            page -= 1;
+        } else {
+            page = parseInt(e.target.name);
         }
+        this.setState({
+            activePage: page
+        });
     };
     
     getImageCarouselItem = (imageId) => {
@@ -80,8 +80,13 @@ class CustomersRestaurantView extends Component {
 
         let restaurantDetails = null;
         let reviewForm = null;
-        let category, menuRender = [];
+        let dish, menuRender = [];
         let carouselList = [], carousel;
+        let pagesBar = null, itemsToShow = 5, active = 1;
+
+        if (this.state && this.state.activePage) {
+            active = this.state.activePage;
+        }
 
         if (this.state && this.state.resData && this.state.resData.rest_images[0]) {
             for (var i = 0; i < this.state.resData.rest_images.length; i++) {
@@ -192,11 +197,40 @@ class CustomersRestaurantView extends Component {
                 
         }
 
-        if (this.state && this.state.categories) {
-            for (var j = 0; j < this.state.categories.length; j++) {
-                category = this.dishesView(this.state.categories[j]);
-                menuRender.push(category);
+        if (this.state && this.state.resData && this.state.resData.rest_dishes && this.state.resData.rest_dishes.length > 0) {
+
+            let dishes = this.state.resData.rest_dishes;
+            let cardCount = 0;
+
+            for (let i = (active - 1) * itemsToShow; i < dishes.length; i++) {
+                console.log('**************** dishes : ', dishes[i]);
+                dish = this.dishesView(this.state.resData.rest_dishes[i]);
+                menuRender.push(dish);
+                cardCount++;
+                if (cardCount === itemsToShow)
+                    break;
             }
+
+            let pages = [];
+            let pageCount = Math.ceil(dishes.length / itemsToShow);
+
+            for (let i = 1; i <= pageCount; i++) {
+                pages.push(
+                    <Pagination.Item key={i} active={i === active} name={i} onClick={this.changePage}>
+                        {i}
+                    </Pagination.Item>
+                );
+            }
+            pagesBar = (
+                <div>
+                    <br />
+                    <Pagination>
+                        <Pagination.Prev name="1" onClick={this.changePage} />
+                        {pages}
+                        <Pagination.Next name={pageCount} onClick={this.changePage} />
+                    </Pagination>
+                </div>
+            );
         }
 
         let reviewSubmissionStatus;
@@ -228,6 +262,7 @@ class CustomersRestaurantView extends Component {
                 <br/>
                 </center>
                 {menuRender}
+                <div style ={{marginLeft:'35%'}} >{pagesBar}</div>
                 <br/>
                 <Button style ={{marginLeft:'10rem'}} href="/c_cart">Go To Cart</Button>
                 <br/><br/><br/>

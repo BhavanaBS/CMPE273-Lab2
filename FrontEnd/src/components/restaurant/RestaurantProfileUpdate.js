@@ -149,7 +149,9 @@ class RestaurantProfileForm extends Component {
         return (
             <div>
             {redirectVar}
-            <br/><br/><br/>
+            <br/><br/>
+            <center><b>{message}</b></center>
+            <br/>
                 <Container style={{ marginLeft:'3rem', marginRight:'3rem' }} fluid={true}>
                     <Row>
                         <Col xs={6} md={4}>
@@ -301,7 +303,6 @@ class RestaurantProfileForm extends Component {
                             </Form>
                         </Col>
                     </Row>
-                    {message}
                 </Container>
             </div>
         )

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Alert } from "react-bootstrap";
+import { Container, Alert, Pagination } from "react-bootstrap";
 import Dish from "./Dish";
 import { getMenu, deleteDish } from "../../redux/action/menuActions";
 import { connect } from "react-redux";
@@ -8,34 +8,21 @@ import PropTypes from 'prop-types';
 class RestaurantMenuView extends Component {
     constructor(props) {
         super(props);
-        this.setState({ 
-            categories: ["Main Course", "Salads", "Appetizer", "Desserts", "Beverages"],
-        });
         this.changePage = this.changePage.bind(this);
     }
 
     componentDidMount() {
-        this.setState({
-            categories: ["Main Course", "Salads", "Appetizer", "Desserts", "Beverages"],
-        });
         this.props.getMenu();
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.dishes) {
             var { dishes } = nextProps;
-
-            if(dishes.noRecord){
-                this.setState({
-                    noRecord: true,
-                });
-            } else {
-                console.log('RestaurantMenuView -> componentWillReceiveProps -> dishes : ', dishes);
-                this.setState({
-                    dishes: dishes,
-                    activePage: 1
-                });
-            }
+            console.log('RestaurantMenuView -> componentWillReceiveProps -> dishes : ', dishes);
+            this.setState({
+                dishes: dishes,
+                activePage: 1
+            });
         }
         if (nextProps.deleteDishStatus && nextProps.deleteDishStatus !== this.props.deleteDishStatus) {
             var { deleteDishStatus } = nextProps;
@@ -50,20 +37,8 @@ class RestaurantMenuView extends Component {
         this.props.deleteDish (e.target.name);
     };
 
-    dishesView = (category) => {
-        var categoriesView = [], dishes, dish, categoryHtml;
-        if (this.state && this.state.dishes && this.state.dishes.length > 0) {
-            dishes = this.state.dishes.filter(dish => dish.category === category);
-            if (dishes.length > 0) {
-                categoryHtml = <h3><br/>{category}</h3>;
-                categoriesView.push(categoryHtml);
-                for (var i = 0; i < dishes.length; i++) {
-                    dish = <Dish dish={dishes[i]} deleteDish={this.deleteDish}/>;
-                    categoriesView.push(dish);
-                }
-            }
-            return categoriesView;
-        }
+    dishesView = (inputDish) => {
+        return <Dish dish={inputDish} deleteDish={this.deleteDish}/>;
     };
 
     changePage = (e) => {
@@ -82,22 +57,54 @@ class RestaurantMenuView extends Component {
 
     render() {
         let message = null,
-            category,
+            dish,
             menuRender = [],
             pagesBar = null,
-            itemsToShow = 1,
+            itemsToShow = 5,
             active = 1;
 
-        if (this.state && !this.state.dishes) {
+        if (this.state && this.state.activePage) {
+            active = this.state.activePage;
+        }
+
+        if (this.state && this.state.dishes === 'NO_DISHES') {
             message = <Alert variant="warning">Dishes not added to the menu yet</Alert>;
         }
-        
-        if (this.state && this.state.categories && this.state.categories.length > 0) {
-            console.log('The categories are : ', this.state.categories);
-            for (var i = 0; i < this.state.categories.length; i++) {
-                category = this.dishesView(this.state.categories[i]);
-                menuRender.push(category);
+
+        if (this.state && this.state.dishes && this.state.dishes !== 'NO_DISHES' && this.state.dishes.length > 0) {
+
+            let dishes = this.state.dishes;
+            let cardCount = 0;
+
+            for (let i = (active - 1) * itemsToShow; i < dishes.length; i++) {
+                console.log('**************** dishes : ', dishes[i]);
+                dish = this.dishesView(this.state.dishes[i]);
+                menuRender.push(dish);
+                cardCount++;
+                if (cardCount === itemsToShow)
+                    break;
             }
+
+            let pages = [];
+            let pageCount = Math.ceil(dishes.length / itemsToShow);
+
+            for (let i = 1; i <= pageCount; i++) {
+                pages.push(
+                    <Pagination.Item key={i} active={i === active} name={i} onClick={this.changePage}>
+                        {i}
+                    </Pagination.Item>
+                );
+            }
+            pagesBar = (
+                <div>
+                    <br />
+                    <Pagination>
+                        <Pagination.Prev name="1" onClick={this.changePage} />
+                        {pages}
+                        <Pagination.Next name={pageCount} onClick={this.changePage} />
+                    </Pagination>
+                </div>
+            );
         }
 
         if (this.state && this.state.deleteDishStatus) {
