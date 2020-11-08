@@ -45,7 +45,7 @@ class Dish extends Component {
 
     return (
       <div>
-        <Card bg="light" style={{width:'40rem', height:'18rem'}}>
+        <Card bg="light" style={{width:'55rem', height:'18rem'}}>
           <Row>
             <Col  align="left" style={{width:'15rem', height:'15rem'}}>
               <Carousel style={{width:'15rem', height:'15rem'}}>

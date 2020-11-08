@@ -127,15 +127,18 @@ class CustomerMessage extends Component {
             messageSendError = <Alert variant="warning">Unable to send message, please try in sometime.</Alert>;
         }
 
-        if (this.state && this.state.customerMessages[0] && this.state.customerMessages[0].messages
-            && this.state.customerMessages[0].messages.length > 0) {
-            var messages = this.state.customerMessages[0].messages;
-            console.log('Messages: ', messages);
-            for (var i = 0; i < messages.length; i++) {
-                messageCard = (
-                    <Message key={messages[i]._id} current_id={localStorage.getItem('customer_id')} message={messages[i]}/>
-                );
-                messageCards.push(messageCard);
+        if (this.state && this.state.customerMessages && this.state.customerMessages.length > 0) {
+            for(var j = 0; j < this.state.customerMessages.length; j++) {
+                if(this.state.restaurant_id._id === this.state.customerMessages[j].restaurant_id._id) {
+                    var messages = this.state.customerMessages[j].messages;
+                    console.log('Messages: ', messages);
+                    for (var i = 0; i < messages.length; i++) {
+                        messageCard = (
+                            <Message key={messages[i]._id} current_id={localStorage.getItem('customer_id')} message={messages[i]}/>
+                        );
+                        messageCards.push(messageCard);
+                    }
+                }
             }
         }
 

@@ -115,7 +115,7 @@ class CustomerHome extends Component {
             resCard = null,
             pagesBar = null,
             active = 1,
-            itemsToShow = 5,
+            itemsToShow = 2,
             noRecordMessage = null;
 
         if (this.state && this.state.activePage) {
