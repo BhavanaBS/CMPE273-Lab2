@@ -14,6 +14,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import { connect } from "react-redux";
 import { getRestaurantOrders, updateOrder } from "../../redux/action/orderActions";
 import backend from "../common/serverDetails"
+import { Link } from 'react-router-dom';
 
 class RestaurantOrders extends Component {
 
@@ -292,6 +293,10 @@ class RestaurantOrders extends Component {
                                                 <tr>
                                                     <td>Blog</td>
                                                     <td>{modal_customer.blog_url}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Message</td>
+                                                    <td><Link to={{pathname: `/restaurant/messages/${modal_customer._id}`, state: modal_customer}}> Send Message to {modal_customer.name} </Link></td>
                                                 </tr>
                                             </tbody>
                                         </Table>

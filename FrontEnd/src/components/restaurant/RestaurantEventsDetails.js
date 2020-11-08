@@ -4,6 +4,7 @@
 import React, { Component } from 'react';
 import { Table, Modal, Alert, Button} from "react-bootstrap";
 import backend from '../common/serverDetails';
+import { Link } from 'react-router-dom';
 
 class RestaurantEventsDetails extends Component {
     constructor(props) {
@@ -45,10 +46,14 @@ class RestaurantEventsDetails extends Component {
         return ts.toLocaleString();
     }
 
+    sendMessage(e) {
+        
+    }
+
     render() {
 
         let participants = [], participant, message;
-        let detailsModal, modalParticipant, modalParticipantImgSrc;
+        let detailsModal, modalParticipant, modalParticipantImgSrc, modalMessage;
         
         for (var i = 0; i < this.state.event.participants.length; i++) {
             if(this.state.event.participants[i]){    
@@ -125,6 +130,10 @@ class RestaurantEventsDetails extends Component {
                                             <tr>
                                                 <td>Blog</td>
                                                 <td>{modalParticipant.blog_url}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Message</td>
+                                                <td><Link to={{pathname: `/restaurant/messages/${modalParticipant._id}`, state: modalParticipant}}> Send Message to {modalParticipant.name} </Link></td>
                                             </tr>
                                         </tbody>
                                     </Table>

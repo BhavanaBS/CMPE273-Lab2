@@ -18,8 +18,7 @@ const restProfileSchema = new Schema({
   map_location: { type: String, default: null },
   rest_images: [{ type: String }],
   rest_dishes: [restDishSchema],
-  reviews: [restReviewSchema],
-  messageas: [messageSchema],
+  reviews: [restReviewSchema]
 },
 {
   versionKey: false,

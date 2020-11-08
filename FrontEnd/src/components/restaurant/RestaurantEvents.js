@@ -9,6 +9,7 @@ import { Button, Nav } from 'react-bootstrap';
 import RestaurantEventsView from "../restaurant/RestaurantEventsView";
 import RestaurantEventsAdd from "../restaurant/RestaurantEventsAdd";
 import RestaurantEventsDetails from '../restaurant/RestaurantEventsDetails';
+import RestaurantMessage from './RestaurantMessage';
 
 class RestaurantEvents extends Component {
     constructor(props) {
@@ -39,19 +40,13 @@ class RestaurantEvents extends Component {
         <div>
             {redirectVar}
             <div>
-            <Router>
                 <div>
                     <Nav defaultActiveKey="/r_events/view" className="flex-column">
                         <Nav.Link eventKey="1" as={NavLink} to="/r_events/view">Restaurant Events</Nav.Link>
                         <Nav.Link eventKey="2" as={NavLink} to="/r_events/add">Add Event</Nav.Link>
                     </Nav>
-                        <Route path="/r_events/view" component={RestaurantEventsView}/>
-                        <Route path="/r_events/add" component={RestaurantEventsAdd} exact/>
-                        <Route path="/r_events/participants" component={RestaurantEventsDetails} exact/>
                 </div>
-            </Router>
-            <center><Button href="/r_home">Home</Button></center>
-        </div>
+            </div>
         </div>
         );
     }

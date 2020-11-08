@@ -134,7 +134,7 @@ class RestaurantEventsAdd extends Component {
                         <Button type="sumbit">Add Event</Button>
                         <Button  style={{marginLeft:"23rem"}}  href="/r_events/view">Back</Button>
                         <br/>
-                        {eventCreationStatus}
+                        <center>{eventCreationStatus}</center>
                         <br/>
                     </Form>
                 </Col>

@@ -12,6 +12,8 @@ import customerEvents from './customer/CustomerEvents';
 import customerConnect from './customer/CustomerConnect';
 import cart from './customer/Cart'
 import customerOrders from './customer/CustomerOrders';
+import customerMessages from './customer/CustomerMessages';
+import customerMessage from './customer/CustomerMessage';
 
 import restaurantHome from './restaurant/RestaurantHome';
 import restaurantLogin from './restaurant/RestaurantLogin';
@@ -21,6 +23,10 @@ import restaurantEvents from './restaurant/RestaurantEvents';
 import restaurantReviews from './restaurant/RestaurantReviewsView';
 import restaurantMenu from './restaurant/RestaurantMenu';
 import restaurantOrders from './restaurant/RestaurantOrders';
+import restaurantMessage from './restaurant/RestaurantMessage';
+import RestaurantEventsView from "./restaurant/RestaurantEventsView";
+import RestaurantEventsAdd from "./restaurant/RestaurantEventsAdd";
+import RestaurantEventsDetails from './restaurant/RestaurantEventsDetails';
 
 //Create a Main Component
 class Main extends Component {
@@ -40,6 +46,8 @@ class Main extends Component {
                 <Route path="/c_connect" component={customerConnect}/>
                 <Route path="/c_cart" component={cart}/>
                 <Route path="/c_orders" component={customerOrders}/>
+                <Route path="/c_messages" component={customerMessages}/>
+                <Route path="/customer/messages/*" component={customerMessage}/>
 
                 <Route path="/r_login" component={restaurantLogin}/>
                 <Route path="/r_signup" component={restaurantSignup}/>
@@ -49,6 +57,10 @@ class Main extends Component {
                 <Route path="/r_events" component={restaurantEvents}/>
                 <Route path="/r_menu" component={restaurantMenu}/>
                 <Route path="/r_orders" component={restaurantOrders}/>
+                <Route path="/restaurant/messages/*" component={restaurantMessage}/>
+                <Route path="/r_events/view" component={RestaurantEventsView} exact/>
+                <Route path="/r_events/add" component={RestaurantEventsAdd} exact/>
+                <Route path="/r_events/participants" component={RestaurantEventsDetails} exact/>
 
             </div>
         )

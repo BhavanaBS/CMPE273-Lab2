@@ -77,7 +77,7 @@ class HeaderNavbar extends Component {
                                     <Dropdown.Item><Link to="/c_orders">Order History</Link></Dropdown.Item>
                                     <Dropdown.Item><Link to="/c_events/view">Events</Link></Dropdown.Item>
                                     <Dropdown.Item><Link to="/c_connect/view">Connections</Link></Dropdown.Item>
-                                    <Dropdown.Item><Link to="/c_profile">Messages</Link></Dropdown.Item>
+                                    <Dropdown.Item><Link to="/c_messages">Messages</Link></Dropdown.Item>
                                     <Dropdown.Item><Link to="/" onClick = {this.handleLogout}>Logout</Link></Dropdown.Item>
                                 </Dropdown.Menu>
                             </Dropdown>
